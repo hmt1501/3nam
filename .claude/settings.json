@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/auto-deploy.sh\"",
+            "timeout": 60,
+            "statusMessage": "Đang push lên GitHub Pages..."
+          }
+        ]
+      }
+    ]
+  }
+}

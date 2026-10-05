@@ -21,4 +21,12 @@ Sửa các giá trị trong [`config.js`](config.js). Những nội dung có `[M
 
 Trong dự án này, workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) kiểm tra cú pháp JavaScript và đóng gói website tĩnh. Mỗi lần push lên nhánh mặc định, GitHub Actions tự triển khai bản mới lên Pages; có thể xem tiến độ tại tab **Actions**. Muốn kiểm tra bản mới trên điện thoại hoặc máy khác, lưu thay đổi, commit và push, rồi mở cùng địa chỉ Pages sau khi workflow kết thúc.
 
-Chưa có dịch vụ nào được dùng để triển khai website từ thư mục này.
+Website đang chạy tại **https://hmt1501.github.io/3nam/** (repo: https://github.com/hmt1501/3nam).
+
+### Tự động deploy sau mỗi lần sửa
+
+- **Khi Claude Code sửa code:** hook `Stop` trong [`.claude/settings.json`](.claude/settings.json) chạy [`scripts/auto-deploy.sh`](scripts/auto-deploy.sh) mỗi khi Claude trả lời xong — tự `git add`, commit và push, Pages cập nhật sau khoảng 1 phút.
+- **Khi bạn tự sửa file:** chạy `powershell -ExecutionPolicy Bypass -File scripts\watch-deploy.ps1` và để cửa sổ đó mở; mỗi lần lưu file, sau 5 giây không có thay đổi mới nó sẽ tự commit + push.
+- Hoặc chạy tay: `bash scripts/auto-deploy.sh`.
+
+Mở link trên điện thoại / máy khác; nếu chưa thấy bản mới, kéo để tải lại (trình duyệt có thể cache vài phút).
