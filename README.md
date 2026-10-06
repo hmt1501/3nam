@@ -9,7 +9,9 @@ Website tĩnh, chạy trực tiếp trên trình duyệt, không cần backend h
 
 ## Cá nhân hóa nội dung
 
-Sửa các giá trị trong [`config.js`](config.js). Những nội dung có `[MẪU]` đang chờ thay bằng thông tin thật. Tệp này có tên, biệt danh, ngày kỷ niệm, lời giới thiệu, câu hỏi và đáp án, cáo buộc, lời nút “Không”, cột mốc, vật phẩm trong game, lời nhắn và kế hoạch hẹn.
+Mọi chữ hiện trên web nằm trong [`config.js`](config.js): tên, biệt danh, ngày bắt đầu (`relationshipStart`, dùng để đếm số ngày), câu hỏi, tật xấu, hồ sơ hai người, dòng thời gian, vật phẩm trong game, lời nhắn cuối và thư mời hẹn.
+
+Mỗi câu hỏi có `answer` (vị trí đáp án đúng, `-1` nếu chỉ tính câu tự gõ), `fact` (chuyện thật, hiện sau khi trả lời) và tùy chọn `other`. Có `other` thì câu hỏi có thêm ô **Khác** để tự gõ; câu gõ được tính đúng nếu chứa một trong các cụm trong `other`, không phân biệt hoa thường hay có dấu (ví dụ `"com tam"` khớp với “Cơm tấm sườn”). Để trống `dateNight` thì phần thư mời tự ẩn.
 
 Để thêm ảnh, tạo thư mục `images` cạnh `index.html`, chép ảnh vào đó, rồi điền đường dẫn tương ứng vào `image` của cột mốc hoặc `sharedPhoto`. Ví dụ: `images/hen-dau.jpg`. Để thêm lời thoại, đặt tệp âm thanh trong `images` hoặc thư mục riêng và điền `voiceUrl`; để thêm bài hát, điền liên kết vào `songUrl`. Có thể để trống các trường media.
 
