@@ -147,24 +147,24 @@ h1, h2, h3, h4, p { margin: 0; }
 .choice-status { min-height: 26px; font-size: 14px; color: var(--red-dark); font-weight: 600; }
 
 /* Game */
-.game-wrap { max-width: 560px; margin: 0 auto; }
-.game-hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
-.legend { font: 12px var(--mono); color: var(--muted); }
-.legend i { font-style: normal; margin: 0 6px; color: var(--faint); }
-.hud-right { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
-.hud-right b { font: 13px var(--mono); color: var(--red); }
-.hud-right strong { font: 700 17px var(--mono); min-width: 5ch; text-align: right; }
-.game-frame { position: relative; border: 8px solid #27322c; border-radius: var(--r-l); background: #34433a; overflow: hidden; box-shadow: var(--shadow); touch-action: none; }
-.game-frame canvas { display: block; width: 100%; height: auto; aspect-ratio: 360/510; }
+.game-wrap { max-width: 520px; margin: 0 auto; }
+.food-legend { display: grid; gap: 8px; margin-bottom: 14px; }
+.food-legend > div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.food-legend b { font: 500 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--green); width: 34px; }
+.food-legend b.bad { color: var(--red); }
+.food-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 4px; border: 1px solid var(--line); border-radius: 99px; background: var(--cream); font-size: 13px; font-weight: 600; line-height: 1.6; }
+.food-chip img { width: 22px; height: 22px; }
+.game-hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; font: 13px var(--mono); color: var(--muted); }
+.game-hud span strong { font-size: 17px; color: var(--ink); }
+.game-hud b { color: var(--red); letter-spacing: .1em; }
+.game-hud > strong { font: 700 17px var(--mono); min-width: 5ch; text-align: right; color: var(--ink); }
+.game-frame { position: relative; border: 8px solid #27201c; border-radius: var(--r-l); background: #3a2a22; overflow: hidden; box-shadow: var(--shadow); touch-action: none; user-select: none; -webkit-user-select: none; }
+.game-frame canvas { display: block; width: 100%; height: auto; aspect-ratio: 360/510; cursor: crosshair; touch-action: none; }
 .game-overlay { position: absolute; inset: 0; background: #121923d0; color: #fff8eb; display: flex; align-items: center; justify-content: center; text-align: center; padding: 25px; }
-.game-overlay-inner { max-width: 340px; }
+.game-overlay-inner { max-width: 320px; }
 .game-overlay .eyebrow { color: #f2a090; }
 .game-overlay h3 { font: 700 30px var(--serif); margin: 8px 0 10px; }
 .game-overlay p { color: #eee4d4; margin-bottom: 20px; }
-.game-controls { display: flex; justify-content: space-between; gap: 15px; margin-top: 14px; }
-.control-btn { width: 88px; height: 58px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--cream); color: var(--ink); font-size: 22px; font-weight: 800; touch-action: none; }
-.control-btn:active { background: var(--sunk); }
-.control-hint { align-self: center; color: var(--faint); font: 10px var(--mono); text-align: center; letter-spacing: .06em; }
 
 /* Kho kỉ niệm */
 .profiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 40px; }
@@ -232,8 +232,6 @@ h1, h2, h3, h4, p { margin: 0; }
   .choice-actions { gap: 10px; min-height: 136px; }
   .choice-stage { padding: 30px 16px 24px; }
   .game-frame { border-width: 5px; }
-  .game-hud { flex-wrap: wrap; }
-  .control-btn { height: 60px; flex: 1; max-width: 130px; }
   .memory { grid-template-columns: 1fr; gap: 6px; }
   .profile dl div { grid-template-columns: 96px 1fr; }
   .invite-grid { grid-template-columns: 1fr; }

@@ -5,7 +5,7 @@
   const toast = document.getElementById('toast');
   const OTHER = 'other';
   const DAY = 864e5;
-  const STEPS = [['quiz', 'Hỏi cung'], ['court', 'Phân xử'], ['choice', 'Câu hỏi'], ['game', 'Về đích'], ['final', 'Mở thư']];
+  const STEPS = [['quiz', 'Hỏi cung'], ['court', 'Phân xử'], ['choice', 'Câu hỏi'], ['game', 'Chém món'], ['final', 'Mở thư']];
   const RIGHT = ['Đúng rồi.', 'Chuẩn.', 'Giỏi đấy.', 'Nhớ dai ghê.'];
   const WRONG = ['Sai rồi nhé.', 'Hụt.', 'Không phải đâu.', 'Trật lất.'];
   const fresh = () => ({ screen: 'home', from: 'court', quiz: 0, score: 0, verdicts: {}, yes: 0, noDodges: 0, noRefused: false, gameWon: false });
@@ -162,89 +162,138 @@
   }
 
   function gameScreen() {
-    app.innerHTML = `<section class="section">${head({ back: 'choice', backLabel: 'Câu hỏi', step: 'game', eyebrow: 'Phần 4 · Chứng minh đi', title: 'Đường đến buổi hẹn', intro: 'Nhặt ít nhất 3 món trên đường, né mấy thứ phá đám. Có 24 giây, đâm 3 lần là chạy lại.', label: `Nhặt: <span id="scoreLabel">0</span>/3` })}<div class="game-wrap"><div class="game-hud"><span class="legend">Nhặt ${C.gameItems.join(' ')}<i>·</i>Né ${C.gameObstacles.join(' ')}</span><span class="hud-right"><b id="lifeLabel" aria-label="Số mạng">♥ ♥ ♥</b><strong id="timeLabel">24.0s</strong></span></div><div class="game-frame"><canvas id="race" width="360" height="510" aria-label="Đường đua mini game"></canvas><div id="gameOverlay" class="game-overlay"><div class="game-overlay-inner"><div class="eyebrow">Cách chơi</div><h3>Sẵn sàng chưa?</h3><p>Vuốt trái/phải trên đường, chạm hai bên màn hình, bấm nút bên dưới hoặc dùng phím ← →.</p><button class="btn btn-primary" id="startRace">Xuất phát →</button></div></div></div><div class="game-controls"><button class="control-btn" id="leftControl" aria-label="Sang trái">←</button><div class="control-hint">CHẠM / VUỐT<br>ĐỂ ĐỔI LÀN</div><button class="control-btn" id="rightControl" aria-label="Sang phải">→</button></div></div></section>`;
-    setupRace();
+    const G = C.game, chip = f => `<span class="food-chip">${f.img ? `<img src="${esc(f.img)}" alt="" onerror="this.replaceWith('${f.icon}')">` : esc(f.icon)}${esc(f.label)}</span>`;
+    app.innerHTML = `<section class="section">${head({ back: 'choice', backLabel: 'Câu hỏi', step: 'game', eyebrow: 'Phần 4 · Chứng minh đi', title: 'Chém món anh thích', intro: `Chém món của anh để ghi điểm. Món của em cũng bay lên lẫn vào, chém nhầm là mất một mạng. ${G.time} giây, ${G.lives} mạng, cần ${G.target} điểm.` })}<div class="game-wrap"><div class="food-legend"><div><b>Chém</b>${G.good.map(chip).join('')}</div><div><b class="bad">Né</b>${G.bad.map(chip).join('')}</div></div><div class="game-hud"><span>Điểm <strong id="scoreLabel">0</strong>/${G.target}</span><b id="lifeLabel" aria-label="Số mạng">${'♥ '.repeat(G.lives).trim()}</b><strong id="timeLabel">${G.time.toFixed(1)}s</strong></div><div class="game-frame"><canvas id="slice" width="360" height="510" aria-label="Trò chơi chém món ăn"></canvas><div id="gameOverlay" class="game-overlay"><div class="game-overlay-inner"><div class="eyebrow">Cách chơi</div><h3>Sẵn sàng chưa?</h3><p>Vuốt ngón tay hoặc giữ chuột rồi kéo ngang qua món ăn để chém.</p><button class="btn btn-primary" id="startGame">Bắt đầu →</button></div></div></div></div></section>`;
+    setupSlice();
   }
-  function setupRace() {
-    const canvas = document.getElementById('race'), ctx = canvas.getContext('2d'), W = 360, H = 510, lanes = [85, 180, 275];
-    const g = { lane: 1, items: [], score: 0, lives: 3, time: 24, elapsed: 0, last: 0, spawn: 0, running: false, ended: false, raf: 0, hitFlash: 0 };
+  function setupSlice() {
+    const G = C.game, canvas = document.getElementById('slice'), ctx = canvas.getContext('2d'), W = 360, H = 510, GRAVITY = 620, R = 30;
+    const load = f => { const image = new Image(); if (f.img) image.src = f.img; return { ...f, image }; };
+    const good = G.good.map(load), bad = G.bad.map(load);
+    const g = { objs: [], halves: [], drops: [], texts: [], trail: [], score: 0, lives: G.lives, elapsed: 0, last: 0, spawn: .4, running: false, ended: false, raf: 0, flash: 0, shake: 0, down: false };
     const scoreLabel = document.getElementById('scoreLabel'), lifeLabel = document.getElementById('lifeLabel'), timeLabel = document.getElementById('timeLabel');
-    const laneMove = d => { if (g.running) g.lane = Math.max(0, Math.min(2, g.lane + d)); };
-    const roundRect = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); };
-    document.getElementById('leftControl').onpointerdown = e => { e.preventDefault(); laneMove(-1); };
-    document.getElementById('rightControl').onpointerdown = e => { e.preventDefault(); laneMove(1); };
-    let touchX = 0;
-    canvas.onpointerdown = e => { if (!g.running) return; touchX = e.clientX; canvas.setPointerCapture?.(e.pointerId); };
-    canvas.onpointerup = e => {
-      if (!g.running) return;
-      const dx = e.clientX - touchX;
-      if (Math.abs(dx) > 18) laneMove(dx < 0 ? -1 : 1);
-      else { const r = canvas.getBoundingClientRect(); laneMove(e.clientX - r.left < r.width / 2 ? -1 : 1); }
-    };
-    const key = e => {
-      const k = e.key.toLowerCase();
-      if (k === 'arrowleft' || k === 'a') { e.preventDefault(); laneMove(-1); }
-      if (k === 'arrowright' || k === 'd') { e.preventDefault(); laneMove(1); }
-    };
-    window.addEventListener('keydown', key);
-    cleanup = () => { g.running = false; cancelAnimationFrame(g.raf); window.removeEventListener('keydown', key); };
+    const rand = (a, b) => a + Math.random() * (b - a);
+    cleanup = () => { g.running = false; cancelAnimationFrame(g.raf); };
 
+    function spawnWave() {
+      const n = g.elapsed > 18 ? Math.ceil(rand(1, 4)) : Math.ceil(rand(1, 3)), badChance = g.elapsed > 15 ? .4 : .3;
+      for (let i = 0; i < n; i++) {
+        const isBad = Math.random() < badChance, x = rand(60, W - 60);
+        g.objs.push({ food: pick(isBad ? bad : good), bad: isBad, x, y: H + R + i * 18, vx: (W / 2 - x) * rand(.25, .7) + rand(-30, 30), vy: -rand(560, 690), rot: rand(-1, 1), vr: rand(-3, 3) });
+      }
+      g.spawn = rand(.75, 1.15) - Math.min(.3, g.elapsed / 100);
+    }
+    function sprite(food, size) {
+      if (food.image.complete && food.image.naturalWidth) ctx.drawImage(food.image, -size / 2, -size / 2, size, size);
+      else { ctx.font = `${size * .8}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(food.icon, 0, 2); }
+    }
+    function float(text, x, y, color) { g.texts.push({ text, x, y, color, life: .8 }); }
+    function cut(o, angle) {
+      o.dead = true;
+      [-1, 1].forEach(side => g.halves.push({ food: o.food, side, x: o.x, y: o.y, vx: o.vx + side * 90 * Math.cos(angle + Math.PI / 2), vy: Math.min(o.vy, 0) * .4 - 60, rot: angle, vr: side * 4, life: 1.2 }));
+      for (let i = 0; i < 10; i++) g.drops.push({ x: o.x, y: o.y, vx: rand(-160, 160), vy: rand(-220, 60), life: rand(.3, .6), color: o.bad ? '#ff6b57' : '#ffd77a' });
+      if (o.bad) {
+        g.lives--; g.flash = .45; g.shake = .3;
+        float(`${o.food.label}? Món của em mà!`, o.x, o.y - 30, '#ff8a78');
+        if (navigator.vibrate) navigator.vibrate(120);
+      } else { g.score++; float(`+1 ${o.food.label}`, o.x, o.y - 30, '#fff3cf'); }
+    }
+    function hitTest(a, b) {
+      const dx = b.x - a.x, dy = b.y - a.y, len2 = dx * dx + dy * dy;
+      if (len2 < 4) return;
+      const angle = Math.atan2(dy, dx);
+      g.objs.forEach(o => {
+        if (o.dead) return;
+        const t = Math.max(0, Math.min(1, ((o.x - a.x) * dx + (o.y - a.y) * dy) / len2));
+        if (Math.hypot(a.x + t * dx - o.x, a.y + t * dy - o.y) < R + 6) cut(o, angle);
+      });
+    }
+    const toLocal = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height, t: performance.now() }; };
+    canvas.onpointerdown = e => { if (!g.running) return; e.preventDefault(); g.down = true; canvas.setPointerCapture?.(e.pointerId); g.trail = [toLocal(e)]; };
+    canvas.onpointermove = e => {
+      if (!g.running || !g.down) return;
+      const p = toLocal(e), prev = g.trail[g.trail.length - 1];
+      g.trail.push(p); if (prev) hitTest(prev, p);
+    };
+    canvas.onpointerup = canvas.onpointercancel = () => { g.down = false; };
+
+    function update(dt) {
+      g.elapsed += dt; g.spawn -= dt; g.flash = Math.max(0, g.flash - dt); g.shake = Math.max(0, g.shake - dt);
+      if (g.spawn <= 0 && g.elapsed < G.time - 1) spawnWave();
+      g.objs.forEach(o => { o.vy += GRAVITY * dt; o.x += o.vx * dt; o.y += o.vy * dt; o.rot += o.vr * dt; });
+      g.objs = g.objs.filter(o => !o.dead && !(o.vy > 0 && o.y > H + R * 2));
+      g.halves.forEach(h => { h.vy += GRAVITY * dt; h.x += h.vx * dt; h.y += h.vy * dt; h.rot += h.vr * dt; h.life -= dt; });
+      g.halves = g.halves.filter(h => h.life > 0 && h.y < H + 80);
+      g.drops.forEach(d => { d.vy += GRAVITY * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.life -= dt; });
+      g.drops = g.drops.filter(d => d.life > 0);
+      g.texts.forEach(t => { t.y -= 40 * dt; t.life -= dt; });
+      g.texts = g.texts.filter(t => t.life > 0);
+      const now = performance.now();
+      g.trail = g.trail.filter(p => now - p.t < 130);
+      const left = Math.max(0, G.time - g.elapsed);
+      scoreLabel.textContent = g.score;
+      lifeLabel.textContent = '♥ '.repeat(Math.max(0, g.lives)).trim() || '—';
+      timeLabel.textContent = `${left.toFixed(1)}s`;
+      if (g.lives <= 0) endGame(false);
+      else if (left <= 0) endGame(g.score >= G.target);
+    }
     function draw(now) {
       const dpr = Math.min(devicePixelRatio || 1, 2);
       if (canvas.width !== Math.round(W * dpr)) { canvas.width = W * dpr; canvas.height = H * dpr; }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = '#536653'; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#26342e'; ctx.fillRect(35, 0, 290, H);
-      ctx.fillStyle = '#34453c'; ctx.fillRect(43, 0, 274, H);
-      const offset = (g.elapsed * 115) % 70;
-      ctx.strokeStyle = '#cbbd8b'; ctx.lineWidth = 3; ctx.setLineDash([23, 19]); ctx.lineDashOffset = -offset;
-      ctx.beginPath(); ctx.moveTo(132, 0); ctx.lineTo(132, H); ctx.moveTo(228, 0); ctx.lineTo(228, H); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = '#d7c49b';
-      for (let y = -20 + offset; y < H; y += 70) { ctx.fillRect(17, y, 10, 25); ctx.fillRect(333, y + 30, 10, 25); }
-      if (g.running) {
-        const dt = Math.min(.05, (now - g.last) / 1000 || 0);
-        g.elapsed += dt; g.time = Math.max(0, 24 - g.elapsed); g.spawn -= dt; g.hitFlash = Math.max(0, g.hitFlash - dt);
-        if (g.spawn <= 0) {
-          const collect = Math.random() < .62;
-          g.items.push({ lane: Math.floor(Math.random() * 3), y: -30, kind: collect ? 'item' : 'obstacle', symbol: pick(collect ? C.gameItems : C.gameObstacles), done: false });
-          g.spawn = .8 + Math.random() * .36;
-        }
-        g.items.forEach(o => {
-          o.y += dt * 156;
-          if (o.y > 414 && o.y < 470 && !o.done && o.lane === g.lane) {
-            o.done = true;
-            if (o.kind === 'item') g.score++; else { g.lives--; g.hitFlash = .35; }
-          }
-        });
-        g.items = g.items.filter(o => o.y < H + 35 && !(o.done && o.kind === 'item'));
-        scoreLabel.textContent = g.score;
-        lifeLabel.textContent = '♥ '.repeat(Math.max(0, g.lives)).trim() || '—';
-        timeLabel.textContent = `${g.time.toFixed(1)}s`;
-        if (g.lives <= 0) endRace(false); else if (g.time <= 0) endRace(g.score >= 3);
-      }
-      ctx.font = '27px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      g.items.forEach(o => ctx.fillText(o.symbol, lanes[o.lane], o.y));
-      const px = lanes[g.lane], py = 437;
-      ctx.fillStyle = g.hitFlash > 0 ? '#ff8f7e' : '#ed7160'; roundRect(px - 19, py - 29, 38, 58, 11);
-      ctx.fillStyle = '#ffe9bc'; roundRect(px - 13, py - 20, 26, 18, 6);
-      ctx.fillStyle = '#303840'; [[-22, -17], [17, -17], [-22, 12], [17, 12]].forEach(([x, y]) => ctx.fillRect(px + x, py + y, 5, 13));
-      ctx.fillStyle = '#8e3340'; ctx.fillRect(px - 10, py + 7, 20, 3);
+      if (g.running) update(Math.min(.05, (now - g.last) / 1000 || 0));
       g.last = now;
-      if (g.running) g.raf = requestAnimationFrame(draw);
+      const sx = g.shake ? rand(-5, 5) : 0, sy = g.shake ? rand(-5, 5) : 0;
+      ctx.setTransform(dpr, 0, 0, dpr, sx * dpr, sy * dpr);
+      // Thớt gỗ
+      ctx.fillStyle = '#3a2a22'; ctx.fillRect(-10, -10, W + 20, H + 20);
+      for (let i = 0; i < 6; i++) { ctx.fillStyle = i % 2 ? '#40302699' : '#33251e99'; ctx.fillRect(-10, i * 88, W + 20, 86); }
+      ctx.strokeStyle = '#ffffff0d'; ctx.lineWidth = 1;
+      for (let y = 20; y < H; y += 23) { ctx.beginPath(); ctx.moveTo(0, y); ctx.bezierCurveTo(W * .3, y + 6, W * .6, y - 6, W, y + 3); ctx.stroke(); }
+      g.drops.forEach(d => { ctx.globalAlpha = Math.min(1, d.life * 2); ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(d.x, d.y, 3, 0, Math.PI * 2); ctx.fill(); });
+      ctx.globalAlpha = 1;
+      g.halves.forEach(h => {
+        ctx.save(); ctx.globalAlpha = Math.min(1, h.life * 1.5); ctx.translate(h.x, h.y); ctx.rotate(h.rot);
+        ctx.beginPath(); ctx.rect(h.side < 0 ? -40 : 0, -40, 40, 80); ctx.clip(); sprite(h.food, 64); ctx.restore();
+      });
+      g.objs.forEach(o => {
+        ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.rot); sprite(o.food, 64); ctx.restore();
+        ctx.font = '600 11px "Be Vietnam Pro", system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const w = ctx.measureText(o.food.label).width + 14;
+        ctx.fillStyle = '#1b2130cc'; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(o.x - w / 2, o.y + 34, w, 18, 9); else ctx.rect(o.x - w / 2, o.y + 34, w, 18); ctx.fill();
+        ctx.fillStyle = '#fff8eb'; ctx.fillText(o.food.label, o.x, o.y + 43.5);
+      });
+      if (g.trail.length > 1) {
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        for (let i = 1; i < g.trail.length; i++) {
+          const k = i / g.trail.length;
+          ctx.strokeStyle = `rgba(255,248,235,${k})`; ctx.lineWidth = 1 + k * 6;
+          ctx.beginPath(); ctx.moveTo(g.trail[i - 1].x, g.trail[i - 1].y); ctx.lineTo(g.trail[i].x, g.trail[i].y); ctx.stroke();
+        }
+      }
+      ctx.font = '700 15px "Be Vietnam Pro", system-ui'; ctx.textAlign = 'center';
+      g.texts.forEach(t => { ctx.globalAlpha = Math.min(1, t.life * 2); ctx.fillStyle = t.color; ctx.fillText(t.text, Math.max(90, Math.min(W - 90, t.x)), t.y); });
+      ctx.globalAlpha = 1;
+      if (g.flash) { ctx.fillStyle = `rgba(201,80,63,${g.flash * .7})`; ctx.fillRect(-10, -10, W + 20, H + 20); }
+      if (g.running || g.halves.length || g.drops.length) g.raf = requestAnimationFrame(draw);
     }
-    function endRace(win) {
+    function endGame(win) {
       if (g.ended) return;
-      g.running = false; g.ended = true; cancelAnimationFrame(g.raf);
+      g.running = false; g.ended = true; g.down = false; g.trail = [];
       const overlay = document.getElementById('gameOverlay');
       overlay.classList.remove('hidden');
-      overlay.innerHTML = `<div class="game-overlay-inner"><div class="eyebrow">${win ? 'Tới nơi rồi' : 'Chưa tới'}</div><h3>${win ? 'Đến đúng giờ!' : 'Thử lại nhé'}</h3><p>${win ? `Nhặt được ${g.score} món. Coi như chứng minh xong.` : `Mới nhặt được ${g.score} món. Đường còn dài, chạy lại phát nữa.`}</p><button class="btn btn-primary" id="${win ? 'unlockYes' : 'retryRace'}">${win ? 'Mở thư ♥' : 'Chạy lại →'}</button></div>`;
+      const reason = g.lives <= 0 ? `Chém nhầm món của em ${G.lives} lần rồi. Món anh thích mà em cũng nhầm à?` : `Mới được ${g.score}/${G.target} điểm. Chém thêm phát nữa.`;
+      overlay.innerHTML = `<div class="game-overlay-inner"><div class="eyebrow">${win ? 'Qua màn' : 'Chưa qua'}</div><h3>${win ? `${g.score} điểm!` : 'Thử lại nhé'}</h3><p>${win ? 'Biết rõ anh thích ăn gì thế này thì coi như chứng minh xong.' : reason}</p><button class="btn btn-primary" id="${win ? 'unlockYes' : 'retryGame'}">${win ? 'Mở thư ♥' : 'Chơi lại →'}</button></div>`;
       if (win) { state.gameWon = true; confetti(); document.getElementById('unlockYes').onclick = () => { go('final'); confetti(); }; }
-      else document.getElementById('retryRace').onclick = () => render();
+      else document.getElementById('retryGame').onclick = () => render();
     }
+    // Vẽ lại khung đầu khi ảnh tải xong, để màn chờ không bị trống.
+    [...good, ...bad].forEach(f => f.image.addEventListener('load', () => { if (!g.running && !g.ended) draw(performance.now()); }, { once: true }));
     draw(0);
-    document.getElementById('startRace').onclick = () => {
+    document.getElementById('startGame').onclick = () => {
       g.running = true; g.last = performance.now();
       document.getElementById('gameOverlay').classList.add('hidden');
+      const hud = app.querySelector('.game-hud').getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + hud.top - document.querySelector('.topbar').offsetHeight - 8, behavior: 'smooth' });
       g.raf = requestAnimationFrame(draw);
     };
   }
@@ -258,7 +307,7 @@
   function finalScreen() {
     if (!state.gameWon) return go('game');
     const d = C.dateNight || {}, invite = [['Thời gian', d.when], ['Địa điểm', d.where], ['Mặc gì', d.dress], ['Kế hoạch', d.plan]].filter(([, v]) => v);
-    app.innerHTML = `<section class="section">${head({ back: 'game', backLabel: 'Đường đua', step: 'final', eyebrow: 'Phần cuối · Khép hồ sơ 03-A', title: 'Ba năm rồi đấy.' })}<div class="card final-card"><div class="final-seal">ĐÃ<br>KHÉP</div>${C.sharedPhoto ? `<img class="final-photo" src="${esc(C.sharedPhoto)}" alt="Ảnh hai đứa" onerror="this.remove()">` : ''}<p class="final-message">${esc(C.finalMessage)}</p>${invite.length ? `<div class="date-invite"><h3>Thư mời đi hẹn hò</h3><div class="invite-grid">${invite.map(([k, v]) => `<div class="invite-item"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}<div class="media-controls">${C.songUrl ? `<a href="${esc(C.songUrl)}" target="_blank" rel="noopener">♫ Bài hát của hai đứa</a>` : ''}${C.voiceUrl ? `<audio controls preload="none" src="${esc(C.voiceUrl)}">Trình duyệt không phát được âm thanh.</audio>` : ''}<button id="reviewMemories">Kho kỉ niệm ↗</button><button id="restart">Chơi lại từ đầu ↺</button></div></div></section>`;
+    app.innerHTML = `<section class="section">${head({ back: 'game', backLabel: 'Trò chơi', step: 'final', eyebrow: 'Phần cuối · Khép hồ sơ 03-A', title: 'Ba năm rồi đấy.' })}<div class="card final-card"><div class="final-seal">ĐÃ<br>KHÉP</div>${C.sharedPhoto ? `<img class="final-photo" src="${esc(C.sharedPhoto)}" alt="Ảnh hai đứa" onerror="this.remove()">` : ''}<p class="final-message">${esc(C.finalMessage)}</p>${invite.length ? `<div class="date-invite"><h3>Thư mời đi hẹn hò</h3><div class="invite-grid">${invite.map(([k, v]) => `<div class="invite-item"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}<div class="media-controls">${C.songUrl ? `<a href="${esc(C.songUrl)}" target="_blank" rel="noopener">♫ Bài hát của hai đứa</a>` : ''}${C.voiceUrl ? `<audio controls preload="none" src="${esc(C.voiceUrl)}">Trình duyệt không phát được âm thanh.</audio>` : ''}<button id="reviewMemories">Kho kỉ niệm ↗</button><button id="restart">Chơi lại từ đầu ↺</button></div></div></section>`;
     document.getElementById('reviewMemories').onclick = openMemories;
     document.getElementById('restart').onclick = () => { Object.assign(state, fresh()); render(); };
   }

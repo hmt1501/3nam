@@ -9,6 +9,7 @@
  *           trong các cụm từ ở đây (không phân biệt hoa thường, có dấu hay không dấu).
  *   fact:   câu chuyện thật, luôn hiện ra sau khi trả lời dù đúng hay sai.
  */
+const fluent = name => `https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/${encodeURIComponent(name)}/3D/${name.toLowerCase().replace(/ /g, '_')}_3d.png`;
 window.CASE_FILE = {
   agentName: "Bùi Thùy Linh", agentNickname: "Linh Béo",
   partnerName: "Hoàng Mạnh Tân", partnerNickname: "Tân đẹp trai",
@@ -55,9 +56,25 @@ window.CASE_FILE = {
     { date: "25/10/2026", title: "Ba năm", text: "Vẫn tranh chăn, vẫn ăn vặt, vẫn ở đây.", image: "" }
   ],
 
-  // Game: nhặt gameItems, né gameObstacles.
-  gameItems: ["🧸", "🍚", "🍰", "💌"],
-  gameObstacles: ["🔋", "🥶", "⏰", "🌧️"],
+  // Game chém món: chém món của Tân (good) để ghi điểm, chém nhầm món của Linh (bad) là mất một mạng.
+  // img: ảnh sticker (link hoặc "images/com-tam.png"); ảnh lỗi thì tự dùng icon. Ảnh mặc định: Microsoft Fluent Emoji (MIT).
+  game: {
+    time: 30, lives: 3, target: 15,
+    good: [
+      { label: "Cơm tấm", icon: "🍚", img: fluent("Cooked rice") },
+      { label: "Cơm gà", icon: "🍗", img: fluent("Poultry leg") },
+      { label: "Cơm cháy", icon: "🍘", img: fluent("Rice cracker") },
+      { label: "Bánh gấu", icon: "🧸", img: fluent("Teddy bear") },
+      { label: "Bim bim", icon: "🍿", img: fluent("Popcorn") }
+    ],
+    bad: [
+      { label: "Bún bò", icon: "🍜", img: fluent("Steaming bowl") },
+      { label: "Mỳ cay", icon: "🌶️", img: fluent("Hot pepper") },
+      { label: "Tiramisu", icon: "🍰", img: fluent("Shortcake") },
+      { label: "Tart trứng", icon: "🥧", img: fluent("Pie") },
+      { label: "Bánh kem", icon: "🎂", img: fluent("Birthday cake") }
+    ]
+  },
 
   // BẢN NHÁP — Tân nên tự sửa lại bằng giọng của mình.
   finalMessage: "Linh,\n\nBa năm trước anh tỏ tình, hồi đó hai đứa còn cậu cậu tớ tớ. Lần đầu đi chơi em tặng anh hai con búp bê len, rồi em nắm tay anh trước ở phố đi bộ. Anh vẫn nhớ.\n\nMình cũng cãi nhau rồi, có hôm anh đứng ngoài cửa lạnh xong bỏ về. Mình cũng cùng béo lên, cùng thức khuya, tranh chăn nhau mỗi đêm. Mấy cái đó anh không đổi đâu.\n\nNăm thứ tư anh vẫn muốn đi cùng em. Đi ăn cơm gà, đi thêm vài chỗ như Ba Vì, và anh sẽ cố ngồi xem hết một bộ phim với em.\n\nTân",
