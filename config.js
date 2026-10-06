@@ -59,17 +59,17 @@ window.CASE_FILE = {
   // Game chém món: chém món của Tân (good) để ghi điểm, chém nhầm món của Linh (bad) là mất một mạng.
   // img: ảnh sticker (link hoặc "images/com-tam.png"); ảnh lỗi thì tự dùng icon. Ảnh mặc định: Microsoft Fluent Emoji (MIT).
   game: {
-    time: 30, lives: 3, target: 15,
+    time: 30, lives: 3, target: 10,
     good: [
       { label: "Cơm tấm", icon: "🍚", img: fluent("Cooked rice") },
       { label: "Cơm gà", icon: "🍗", img: fluent("Poultry leg") },
-      { label: "Cơm cháy", icon: "🍘", img: fluent("Rice cracker") },
+      { label: "Cơm cháy", icon: "🫓", img: fluent("Flatbread") },
       { label: "Bánh gấu", icon: "🧸", img: fluent("Teddy bear") },
       { label: "Bim bim", icon: "🍿", img: fluent("Popcorn") }
     ],
     bad: [
       { label: "Bún bò", icon: "🍜", img: fluent("Steaming bowl") },
-      { label: "Mỳ cay", icon: "🌶️", img: fluent("Hot pepper") },
+      { label: "Mỳ cay", icon: "🍝", img: fluent("Spaghetti") },
       { label: "Tiramisu", icon: "🍰", img: fluent("Shortcake") },
       { label: "Tart trứng", icon: "🥧", img: fluent("Pie") },
       { label: "Bánh kem", icon: "🎂", img: fluent("Birthday cake") }

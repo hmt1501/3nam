@@ -167,7 +167,7 @@
     setupSlice();
   }
   function setupSlice() {
-    const G = C.game, canvas = document.getElementById('slice'), ctx = canvas.getContext('2d'), W = 360, H = 510, GRAVITY = 620, R = 30;
+    const G = C.game, canvas = document.getElementById('slice'), ctx = canvas.getContext('2d'), W = 360, H = 510, GRAVITY = 620, R = 30, SLOW = .5; // SLOW: món bay chậm bằng một nửa, quỹ đạo giữ nguyên
     const load = f => { const image = new Image(); if (f.img) image.src = f.img; return { ...f, image }; };
     const good = G.good.map(load), bad = G.bad.map(load);
     const g = { objs: [], halves: [], drops: [], texts: [], trail: [], score: 0, lives: G.lives, elapsed: 0, last: 0, spawn: .4, running: false, ended: false, raf: 0, flash: 0, shake: 0, down: false };
@@ -176,12 +176,12 @@
     cleanup = () => { g.running = false; cancelAnimationFrame(g.raf); };
 
     function spawnWave() {
-      const n = g.elapsed > 18 ? Math.ceil(rand(1, 4)) : Math.ceil(rand(1, 3)), badChance = g.elapsed > 15 ? .4 : .3;
+      const n = g.elapsed > 12 && Math.random() < .3 ? 2 : 1, badChance = g.elapsed > 15 ? .35 : .3;
       for (let i = 0; i < n; i++) {
         const isBad = Math.random() < badChance, x = rand(60, W - 60);
         g.objs.push({ food: pick(isBad ? bad : good), bad: isBad, x, y: H + R + i * 18, vx: (W / 2 - x) * rand(.25, .7) + rand(-30, 30), vy: -rand(560, 690), rot: rand(-1, 1), vr: rand(-3, 3) });
       }
-      g.spawn = rand(.75, 1.15) - Math.min(.3, g.elapsed / 100);
+      g.spawn = rand(1.1, 1.6) - Math.min(.3, g.elapsed / 100);
     }
     function sprite(food, size) {
       if (food.image.complete && food.image.naturalWidth) ctx.drawImage(food.image, -size / 2, -size / 2, size, size);
@@ -219,8 +219,9 @@
 
     function update(dt) {
       g.elapsed += dt; g.spawn -= dt; g.flash = Math.max(0, g.flash - dt); g.shake = Math.max(0, g.shake - dt);
-      if (g.spawn <= 0 && g.elapsed < G.time - 1) spawnWave();
-      g.objs.forEach(o => { o.vy += GRAVITY * dt; o.x += o.vx * dt; o.y += o.vy * dt; o.rot += o.vr * dt; });
+      if (g.spawn <= 0 && g.elapsed < G.time - 3) spawnWave();
+      const st = dt * SLOW;
+      g.objs.forEach(o => { o.vy += GRAVITY * st; o.x += o.vx * st; o.y += o.vy * st; o.rot += o.vr * st; });
       g.objs = g.objs.filter(o => !o.dead && !(o.vy > 0 && o.y > H + R * 2));
       g.halves.forEach(h => { h.vy += GRAVITY * dt; h.x += h.vx * dt; h.y += h.vy * dt; h.rot += h.vr * dt; h.life -= dt; });
       g.halves = g.halves.filter(h => h.life > 0 && h.y < H + 80);
