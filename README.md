@@ -15,7 +15,7 @@ Mỗi câu hỏi có `answer` (vị trí đáp án đúng, `-1` nếu chỉ tín
 
 Trò chơi (`game`) là chém món ăn: `good` là món của Tân (chém được điểm), `bad` là món của Linh (chém nhầm mất mạng); chỉnh `time`, `lives`, `target` để đổi độ khó. Mỗi món có `img` (ảnh sticker, mặc định lấy từ Microsoft Fluent Emoji qua jsDelivr) và `icon` dự phòng khi ảnh không tải được. Muốn dùng ảnh riêng thì chép vào `images/` rồi điền `img: "images/ten-anh.png"`.
 
-Để thêm ảnh, tạo thư mục `images` cạnh `index.html`, chép ảnh vào đó, rồi điền đường dẫn tương ứng vào `image` của cột mốc hoặc `sharedPhoto`. Ví dụ: `images/hen-dau.jpg`. Để thêm lời thoại, đặt tệp âm thanh trong `images` hoặc thư mục riêng và điền `voiceUrl`; để thêm bài hát, điền liên kết vào `songUrl`. Có thể để trống các trường media.
+Để thêm ảnh, tạo thư mục `images` cạnh `index.html`, chép ảnh vào đó, rồi điền đường dẫn tương ứng vào `image` của cột mốc hoặc `sharedPhoto`. Ví dụ: `images/hen-dau.jpg`. Để thêm lời thoại, đặt tệp âm thanh trong `images` hoặc thư mục riêng và điền `voiceUrl`; để thêm bài hát, điền liên kết vào `songUrl`. Nhạc nền phát liên tục lấy từ `musicUrl` (mặc định `music/mua-tinh-yeu.mp3`): chép file mp3 vào đúng đường dẫn đó. Có thể để trống các trường media.
 
 ## Đưa lên mạng để chia sẻ
 

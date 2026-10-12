@@ -14,7 +14,7 @@ window.CASE_FILE = {
   agentName: "Bùi Thùy Linh", agentNickname: "Linh Béo",
   partnerName: "Hoàng Mạnh Tân", partnerNickname: "Tân đẹp trai",
   relationshipStart: "2023-10-25",
-  caseIntro: "đối tượng đã ở cạnh Tân đẹp trai 3 năm, hay giành miếng ăn cuối, tranh chăn lúc nửa đêm và chưa có ý định rời đi.",
+  caseIntro: "đối tượng đã ở cạnh Tân đẹp trai 3 năm, hay trấn lột tiền, tranh chăn lúc nửa đêm và chưa có ý định rời đi.",
 
   quiz: [
     { question: "Anh tỏ tình với em ngày nào?", choices: ["20/10/2023", "25/10/2023", "01/11/2023"], answer: 1, other: ["25 10", "25 thang 10"], fact: "25/10/2023. Mọi chuyện bắt đầu từ hôm đó." },
@@ -39,7 +39,6 @@ window.CASE_FILE = {
 
   // Tật xấu: người chơi tự xếp vào Linh / Tân / Cả hai.
   allegations: ["Ngủ cướp chăn", "Ăn vặt nhiều", "Ngủ dậy muộn", "Béo", "Thức khuya", "Sai rồi vẫn lì, không chịu xin lỗi"],
-  noButtonLines: ["Không", "Chắc chưa?", "Nghĩ lại đi", "Bấm hụt rồi kìa", "Thôi được…"],
 
   // Hồ sơ hai đứa, hiện ở trang Kho kỉ niệm.
   profiles: [
@@ -80,5 +79,7 @@ window.CASE_FILE = {
   finalMessage: "Linh,\n\nBa năm trước anh tỏ tình, hồi đó hai đứa còn cậu cậu tớ tớ. Lần đầu đi chơi em tặng anh hai con búp bê len, rồi em nắm tay anh trước ở phố đi bộ. Anh vẫn nhớ.\n\nMình cũng cãi nhau rồi, có hôm anh đứng ngoài cửa lạnh xong bỏ về. Mình cũng cùng béo lên, cùng thức khuya, tranh chăn nhau mỗi đêm. Mấy cái đó anh không đổi đâu.\n\nNăm thứ tư anh vẫn muốn đi cùng em. Đi ăn cơm gà, đi thêm vài chỗ như Ba Vì, và anh sẽ cố ngồi xem hết một bộ phim với em.\n\nTân",
   // Để trống hết thì phần thư mời tự ẩn.
   dateNight: { when: "24/10/2026", where: "Sushi"},
-  songUrl: "", voiceUrl: "", sharedPhoto: ""
+  songUrl: "", voiceUrl: "", sharedPhoto: "",
+  // Nhạc nền phát liên tục (Mưa Tình Yêu / 雨愛): chép file mp3 vào thư mục music/ với đúng tên này. Để trống thì tắt.
+  musicUrl: "music/mua-tinh-yeu.mp3"
 };

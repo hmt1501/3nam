@@ -5,11 +5,11 @@
   const toast = document.getElementById('toast');
   const OTHER = 'other';
   const DAY = 864e5;
-  const STEPS = [['quiz', 'Hỏi cung'], ['court', 'Phân xử'], ['choice', 'Câu hỏi'], ['game', 'Chém món'], ['final', 'Mở thư']];
+  const STEPS = [['quiz', 'Hỏi cung'], ['court', 'Phân xử'], ['choice', 'Phán quyết'], ['game', 'Biện hộ'], ['final', 'Tuyên án']];
   const RIGHT = ['Đúng rồi.', 'Chuẩn.', 'Giỏi đấy.', 'Nhớ dai ghê.'];
   const WRONG = ['Sai rồi nhé.', 'Hụt.', 'Không phải đâu.', 'Trật lất.'];
-  const fresh = () => ({ screen: 'home', from: 'court', quiz: 0, score: 0, verdicts: {}, yes: 0, noDodges: 0, noRefused: false, gameWon: false });
-  const state = { ...fresh(), audio: false };
+  const fresh = () => ({ screen: 'home', quiz: 0, score: 0, verdicts: {}, gameWon: false });
+  const state = fresh();
   let toastTimer, cleanup = null, audioCtx = null;
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -22,12 +22,14 @@
   const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
   const fmtDate = s => parseDate(s).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const daysTogether = () => Math.round((today() - parseDate(C.relationshipStart)) / DAY);
-  function anniversaryNote() {
-    const start = parseDate(C.relationshipStart), now = today();
+  // Đếm ngược tới 0h ngày kỉ niệm kế tiếp; cả ngày kỉ niệm thì báo "hôm nay".
+  function countdown() {
+    const start = parseDate(C.relationshipStart), now = new Date();
     const next = new Date(now.getFullYear(), start.getMonth(), start.getDate());
-    if (next < now) next.setFullYear(next.getFullYear() + 1);
-    const years = next.getFullYear() - start.getFullYear(), left = Math.round((next - now) / DAY);
-    return left === 0 ? `Hôm nay tròn ${years} năm` : `Còn ${left} ngày nữa là tròn ${years} năm`;
+    if (next - now <= -DAY) next.setFullYear(next.getFullYear() + 1);
+    const t = Math.floor((next - now) / 1000), p = n => String(n).padStart(2, '0');
+    if (t <= 0) return `Hôm nay tròn ${next.getFullYear() - start.getFullYear()} năm ♥`;
+    return `Còn ${Math.floor(t / 86400)} ngày ${p(t / 3600 % 24 | 0)}:${p(t / 60 % 60 | 0)}:${p(t % 60)}`;
   }
 
   function showToast(message) { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2300); }
@@ -36,21 +38,22 @@
     if (cleanup) { cleanup(); cleanup = null; }
     (screens[state.screen] || home)();
     app.querySelectorAll('[data-back]').forEach(b => b.onclick = () => go(b.dataset.back));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    app.scrollTop = 0;
   }
   function go(screen) { state.screen = screen; render(); }
-  function openMemories() { state.from = state.screen; go('memories'); }
 
   function stepper(current) {
     const at = STEPS.findIndex(s => s[0] === current);
     return `<ol class="steps" aria-label="Tiến độ">${STEPS.map(([, label], i) => `<li class="${i < at ? 'done' : i === at ? 'now' : ''}"${i === at ? ' aria-current="step"' : ''}><span>${i < at ? '✓' : i + 1}</span><em>${label}</em></li>`).join('')}</ol>`;
   }
   function head({ back, backLabel, step, eyebrow, title, intro = '', label = '' }) {
-    return `<div class="section-top"><button class="back-link" data-back="${back}">← ${backLabel}</button>${step ? stepper(step) : ''}</div><div class="section-head"><div><div class="eyebrow">${eyebrow}</div><h2 class="screen-title">${title}</h2>${intro ? `<p class="intro">${intro}</p>` : ''}</div>${label ? `<div class="step-label">${label}</div>` : ''}</div>`;
+    return `<div class="section-top"><button class="back-link" data-back="${back}">← ${backLabel}</button>${step ? stepper(step) : ''}</div><div class="section-head"><div><div class="eyebrow">${eyebrow}</div>${title ? `<h2 class="screen-title">${title}</h2>` : ''}${intro ? `<p class="intro">${intro}</p>` : ''}</div>${label ? `<div class="step-label">${label}</div>` : ''}</div>`;
   }
 
   function home() {
-    app.innerHTML = `<section class="hero" id="home"><div class="hero-copy"><div class="eyebrow">Chuyên án kỉ niệm 3 năm</div><h1>HỒ SƠ<br>TUYỆT MẬT<br><em>03 NĂM</em></h1><p class="lead">Hồ sơ này chỉ mở cho <b>${esc(C.agentNickname)}</b>. Có một vụ cần em điều tra: ${esc(C.caseIntro)}</p><dl class="case-facts"><div class="fact"><dt>Đối tượng</dt><dd>${esc(C.partnerName)}<small>hay ${esc(C.partnerNickname)}</small></dd></div><div class="fact"><dt>Ngày bắt đầu</dt><dd>${fmtDate(C.relationshipStart)}<small>Ngày tỏ tình</small></dd></div><div class="fact"><dt>Đã ở cạnh nhau</dt><dd>${daysTogether().toLocaleString('vi-VN')} ngày<small>${anniversaryNote()}</small></dd></div></dl><button class="btn btn-primary" id="start">Nhận vụ này →</button></div><div class="hero-art" aria-hidden="true"><span class="heart-note">♥</span><span class="paperclip">⌁</span><div class="folder"><div class="folder-tag">P.H.S · ĐIỀU TRA TÌNH CẢM</div><div class="folder-name">Vụ án: Hai đứa và miếng ăn cuối</div><div class="folder-lines">MÃ HỒ SƠ: 03-A<br>MỨC ĐỘ: RẤT ĐÁNG NGỜ<br>TÌNH TRẠNG: VẪN THƯƠNG NHAU</div><div class="stamp">TỐI<br>MẬT</div></div></div></section>`;
+    app.innerHTML = `<section class="hero" id="home"><div class="hero-copy"><h1>HỒ SƠ<br>TUYỆT MẬT<br><em>03 NĂM</em></h1><p class="lead">Hồ sơ này chỉ mở cho <b>${esc(C.agentNickname)}</b>. Có một vụ cần em điều tra: ${esc(C.caseIntro)}</p><dl class="case-facts"><div class="fact"><dt>Đối tượng</dt><dd>${esc(C.partnerName)}<small>hay ${esc(C.partnerNickname)}</small></dd></div><div class="fact"><dt>Ngày bắt đầu</dt><dd>${fmtDate(C.relationshipStart)}<small>Ngày tỏ tình</small></dd></div><div class="fact"><dt>Đã ở cạnh nhau</dt><dd>${daysTogether().toLocaleString('vi-VN')} ngày<small id="countdown">${countdown()}</small></dd></div></dl><button class="btn btn-primary" id="start">Nhận vụ này →</button></div><div class="hero-art" aria-hidden="true"><span class="heart-note">♥</span><span class="paperclip">⌁</span><div class="folder"><div class="folder-name">Vụ án tuyệt mật</div><div class="folder-lines">Tình trạng: đã lưu hồ sơ 3 năm và hơn nữa</div></div></div></section>`;
+    const timer = setInterval(() => document.getElementById('countdown').textContent = countdown(), 1000);
+    cleanup = () => clearInterval(timer);
     document.getElementById('start').onclick = () => { Object.assign(state, { quiz: 0, score: 0 }); go('quiz'); };
   }
 
@@ -58,7 +61,7 @@
     const q = C.quiz[state.quiz];
     if (!q) return go('quizResult');
     const total = C.quiz.length, hasOther = Array.isArray(q.other) && q.other.length > 0;
-    app.innerHTML = `<section class="section">${head({ back: 'home', backLabel: 'Trang đầu', step: 'quiz', eyebrow: 'Phần 1 · Hỏi cung', title: 'Em nhớ được bao nhiêu?', label: `Câu ${state.quiz + 1}/${total}` })}<div class="card question-card"><div class="progress"><span style="width:${state.quiz / total * 100}%"></span></div><h3 class="question">${esc(q.question)}</h3><div class="choices">${q.choices.map((x, i) => `<button class="choice" data-answer="${i}">${esc(x)}</button>`).join('')}${hasOther ? `<button class="choice choice-other" data-answer="${OTHER}">Khác, để em tự ghi…</button>` : ''}</div>${hasOther ? `<form class="other-form hidden" id="otherForm"><label for="otherInput">Em nghĩ là gì?</label><div class="other-row"><input id="otherInput" autocomplete="off" maxlength="80" placeholder="Gõ câu trả lời"><button class="btn btn-dark" type="submit">Chốt</button></div></form>` : ''}<div id="quizFeedback" class="feedback">Chọn một đáp án.</div><div class="action-row"><button class="small-link" id="skipQuiz">Bỏ qua phần này</button><button class="btn btn-primary hidden" id="nextQuiz">${state.quiz === total - 1 ? 'Xem kết quả' : 'Câu tiếp'} →</button></div></div></section>`;
+    app.innerHTML = `<section class="section">${head({ back: 'home', backLabel: 'Trang đầu', step: 'quiz', eyebrow: 'Phần 1 · Hỏi cung', title: 'Thông tin bị cáo', label: `Câu ${state.quiz + 1}/${total}` })}<div class="card question-card"><div class="progress"><span style="width:${state.quiz / total * 100}%"></span></div><h3 class="question">${esc(q.question)}</h3><div class="choices">${q.choices.map((x, i) => `<button class="choice" data-answer="${i}">${esc(x)}</button>`).join('')}${hasOther ? `<button class="choice choice-other" data-answer="${OTHER}">Khác, để em tự ghi…</button>` : ''}</div>${hasOther ? `<form class="other-form hidden" id="otherForm"><label for="otherInput">Em nghĩ là gì?</label><div class="other-row"><input id="otherInput" autocomplete="off" maxlength="80" placeholder="Gõ câu trả lời"><button class="btn btn-dark" type="submit">Chốt</button></div></form>` : ''}<div id="quizFeedback" class="feedback">Chọn một đáp án.</div><div class="action-row"><button class="small-link" id="skipQuiz">Bỏ qua phần này</button><button class="btn btn-primary hidden" id="nextQuiz">${state.quiz === total - 1 ? 'Xem kết quả' : 'Câu tiếp'} →</button></div></div></section>`;
     const buttons = [...app.querySelectorAll('[data-answer]')], form = document.getElementById('otherForm'), input = document.getElementById('otherInput');
     const feedback = document.getElementById('quizFeedback'), next = document.getElementById('nextQuiz');
     function settle(right, button, typed) {
@@ -100,7 +103,7 @@
       both: ['Cả hai cùng tội. Án phạt: tiếp tục ở với nhau.', 'Huề. Không ai được chê ai.']
     };
     const fill = s => s.replace('{a}', C.agentNickname).replace('{p}', C.partnerNickname);
-    app.innerHTML = `<section class="section">${head({ back: 'quizResult', backLabel: 'Kết quả hỏi cung', step: 'court', eyebrow: 'Phần 2 · Phân xử', title: 'Tật này của ai?', intro: 'Mỗi tật xấu chọn một người, hoặc cả hai. Khai gì cũng sẽ bị lôi ra trêu về sau.', label: `<span id="courtCount">0</span>/${C.allegations.length}` })}<div class="allegations">${C.allegations.map((x, i) => `<article class="allegation"><span class="count">#${String(i + 1).padStart(2, '0')}</span><p>${esc(x)}</p><div class="suspects">${Object.entries(parties).map(([k, name]) => `<button class="verdict-choice${state.verdicts[i] === k ? ' selected' : ''}" data-charge="${i}" data-party="${k}" aria-pressed="${state.verdicts[i] === k}">${esc(name)}</button>`).join('')}</div></article>`).join('')}</div><div id="courtResult" class="court-result">Tòa đang chờ lời khai đầu tiên.</div><div class="action-row"><button class="small-link" id="toMemories">Xem kho kỉ niệm</button><button class="btn btn-primary" id="toChoice">Tiếp →</button></div></section>`;
+    app.innerHTML = `<section class="section">${head({ back: 'quizResult', backLabel: 'Kết quả hỏi cung', step: 'court', eyebrow: 'Phần 2 · Phân xử', title: 'Tội ác', label: `<span id="courtCount">0</span>/${C.allegations.length}` })}<div class="allegations">${C.allegations.map((x, i) => `<article class="allegation"><span class="count">#${String(i + 1).padStart(2, '0')}</span><p>${esc(x)}</p><div class="suspects">${Object.entries(parties).map(([k, name]) => `<button class="verdict-choice${state.verdicts[i] === k ? ' selected' : ''}" data-charge="${i}" data-party="${k}" aria-pressed="${state.verdicts[i] === k}">${esc(name)}</button>`).join('')}</div></article>`).join('')}</div><div id="courtResult" class="court-result">Tòa đang chờ lời khai đầu tiên.</div><div class="action-row"><span></span><button class="btn btn-primary" id="toChoice">Tiếp →</button></div></section>`;
     const result = document.getElementById('courtResult');
     function tally() {
       const counts = { agent: 0, partner: 0, both: 0 };
@@ -120,50 +123,47 @@
       if (!tally()) result.textContent = fill(pick(reactions[b.dataset.party]));
     });
     document.getElementById('toChoice').onclick = () => go('choice');
-    document.getElementById('toMemories').onclick = openMemories;
   }
 
   function choice() {
-    const yesLabels = ['Có', 'Có thật mà', 'Tin em đi', 'Để em chứng minh'];
-    const yesReplies = ['Trả lời nhanh thế, chưa nghĩ gì đúng không?', 'Vẫn chưa tin. Ba năm mà bấm Có là xong à?', 'Được rồi. Giờ chứng minh đi.'];
-    const giveUp = 'Thôi, cho bấm thật đấy. Nhưng anh vẫn mong em chọn Có.';
-    app.innerHTML = `<section class="section">${head({ back: 'court', backLabel: 'Phần phân xử', step: 'choice', eyebrow: 'Phần 3 · Câu hỏi', title: 'Còn một câu nữa' })}<div class="choice-stage"><h3>Năm thứ tư, em vẫn đi cùng anh chứ?</h3><p>Trả lời thật lòng. Nút Có hơi được ưu ái một chút.</p><div class="choice-actions" id="choiceActions"><button class="btn btn-primary" id="yesButton">${yesLabels[Math.min(state.yes, 3)]}</button><button class="btn btn-no" id="noButton">${esc(state.noRefused ? 'Không, cảm ơn' : C.noButtonLines[Math.min(state.noDodges, C.noButtonLines.length - 1)])}</button></div><div id="choiceStatus" class="choice-status">${state.noDodges >= 5 && !state.noRefused ? giveUp : ''}</div><button id="noContinue" class="btn btn-quiet ${state.noRefused ? '' : 'hidden'}">Vẫn đi tiếp →</button></div></section>`;
-    const no = document.getElementById('noButton'), area = document.getElementById('choiceActions'), status = document.getElementById('choiceStatus');
-    let swallowClick = false;
-    function dodge() {
-      state.noDodges++;
-      no.textContent = C.noButtonLines[Math.min(state.noDodges, C.noButtonLines.length - 1)];
-      if (state.noDodges >= 5) { no.style.transform = ''; status.textContent = giveUp; return; }
-      const a = area.getBoundingClientRect(), n = no.getBoundingClientRect();
-      const x = n.left + (Math.random() - .5) * Math.min(120, a.width * .38), y = n.top + (Math.random() - .5) * 42;
-      const dx = Math.max(a.left, Math.min(a.right - n.width, x)) - n.left, dy = Math.max(a.top, Math.min(a.bottom - n.height, y)) - n.top;
-      no.style.transform = `translate(${dx}px,${dy}px) rotate(${(Math.random() - .5) * 12}deg)`;
+    app.innerHTML = `<section class="section">${head({ back: 'court', backLabel: 'Phần phân xử', step: 'choice', eyebrow: 'Phần 3 · Phán quyết' })}<div class="choice-stage"><h3>Năm thứ tư, em vẫn đi cùng anh chứ?</h3><div class="choice-actions"><button class="btn btn-primary" id="yesButton">Có</button><button class="btn btn-no" id="noButton">Không</button></div></div><div id="verdictPopup" class="popup hidden" role="alertdialog"><div class="popup-box" id="popupBox" aria-live="assertive"></div></div></section>`;
+    const yes = document.getElementById('yesButton');
+    // Nút Có không bao giờ bấm được: chạm/di chuột/Enter vào là nhảy tới điểm xa con trỏ nhất trong 12 điểm ngẫu nhiên.
+    function flee(e) {
+      e.preventDefault();
+      const r = yes.getBoundingClientRect(), m = 16, cx = e.clientX || r.left + r.width / 2, cy = e.clientY || r.top + r.height / 2;
+      let best = [m, m], far = -1;
+      for (let i = 0; i < 12; i++) {
+        const x = m + Math.random() * (innerWidth - r.width - 2 * m), y = m + Math.random() * (innerHeight - r.height - 2 * m);
+        const d = Math.hypot(x + r.width / 2 - cx, y + r.height / 2 - cy);
+        if (d > far) { far = d; best = [x, y]; }
+      }
+      Object.assign(yes.style, { position: 'fixed', left: `${best[0]}px`, top: `${best[1]}px`, zIndex: 5 });
+      // Tổ tiên đang có transform (hiệu ứng vào trang) thì fixed bị lệch: đo lại rồi bù.
+      const now = yes.getBoundingClientRect();
+      Object.assign(yes.style, { left: `${2 * best[0] - now.left}px`, top: `${2 * best[1] - now.top}px` });
     }
-    // Chuột/ngón tay: né ngay khi vừa chạm. Bàn phím: né khi click. Sau 5 lần thì cho bấm thật.
-    no.addEventListener('pointerdown', e => {
-      if (state.noRefused || state.noDodges >= 5) return;
-      e.preventDefault(); dodge(); swallowClick = true; setTimeout(() => swallowClick = false, 400);
-    });
-    no.addEventListener('click', () => {
-      if (swallowClick) { swallowClick = false; return; }
-      if (state.noRefused) return showToast('Ghi nhận rồi. Hồ sơ vẫn chưa đóng đâu.');
-      if (state.noDodges < 5) return dodge();
-      state.noRefused = true; no.textContent = 'Không, cảm ơn';
-      status.textContent = 'Anh tôn trọng. Đổi ý lúc nào cũng được. ♥';
-      document.getElementById('noContinue').classList.remove('hidden');
-    });
-    document.getElementById('noContinue').onclick = () => { state.noRefused = false; go('game'); };
-    document.getElementById('yesButton').onclick = e => {
-      state.yes++;
-      e.currentTarget.textContent = yesLabels[Math.min(state.yes, 3)];
-      status.textContent = yesReplies[Math.min(state.yes - 1, 2)];
-      if (state.yes >= 3) setTimeout(() => { if (state.screen === 'choice') go('game'); }, 900);
+    yes.addEventListener('pointerenter', flee); yes.addEventListener('pointerdown', flee); yes.onclick = flee;
+    document.getElementById('noButton').onclick = e => {
+      e.currentTarget.disabled = true;
+      const box = document.getElementById('popupBox');
+      document.getElementById('verdictPopup').classList.remove('hidden');
+      box.innerHTML = '<p>Haiz biết ngay không yêu tôi mà</p>';
+      let later;
+      const first = setTimeout(() => {
+        box.innerHTML = '<p>Tất cả chỉ là lừa dối thôi, yêu đương gì nữa</p>';
+        later = setTimeout(() => {
+          box.insertAdjacentHTML('beforeend', '<p class="popup-note">Nếu có chút tình cảm thì hãy chứng minh đi đừng nói suông</p><button class="btn btn-primary" id="proveIt">Chứng minh</button>');
+          document.getElementById('proveIt').onclick = () => go('game');
+        }, 5000);
+      }, 2000);
+      cleanup = () => { clearTimeout(first); clearTimeout(later); };
     };
   }
 
   function gameScreen() {
     const G = C.game, chip = f => `<span class="food-chip">${f.img ? `<img src="${esc(f.img)}" alt="" onerror="this.replaceWith('${f.icon}')">` : esc(f.icon)}${esc(f.label)}</span>`;
-    app.innerHTML = `<section class="section">${head({ back: 'choice', backLabel: 'Câu hỏi', step: 'game', eyebrow: 'Phần 4 · Chứng minh đi', title: 'Chém món anh thích', intro: `Chém món của anh để ghi điểm. Món của em cũng bay lên lẫn vào, chém nhầm là mất một mạng. ${G.time} giây, ${G.lives} mạng, cần ${G.target} điểm.` })}<div class="game-wrap"><div class="food-legend"><div><b>Chém</b>${G.good.map(chip).join('')}</div><div><b class="bad">Né</b>${G.bad.map(chip).join('')}</div></div><div class="game-hud"><span>Điểm <strong id="scoreLabel">0</strong>/${G.target}</span><b id="lifeLabel" aria-label="Số mạng">${'♥ '.repeat(G.lives).trim()}</b><strong id="timeLabel">${G.time.toFixed(1)}s</strong></div><div class="game-frame"><canvas id="slice" width="360" height="510" aria-label="Trò chơi chém món ăn"></canvas><div id="gameOverlay" class="game-overlay"><div class="game-overlay-inner"><div class="eyebrow">Cách chơi</div><h3>Sẵn sàng chưa?</h3><p>Vuốt ngón tay hoặc giữ chuột rồi kéo ngang qua món ăn để chém.</p><button class="btn btn-primary" id="startGame">Bắt đầu →</button></div></div></div></div></section>`;
+    app.innerHTML = `<section class="section">${head({ back: 'choice', backLabel: 'Phán quyết', step: 'game', eyebrow: 'Phần 4 · Biện hộ', title: 'Anh thích ăn gì?' })}<div class="game-wrap"><div class="food-legend"><div><b>Chém</b>${G.good.map(chip).join('')}</div><div><b class="bad">Né</b>${G.bad.map(chip).join('')}</div></div><div class="game-hud"><span>Điểm <strong id="scoreLabel">0</strong>/${G.target}</span><b id="lifeLabel" aria-label="Số mạng">${'♥ '.repeat(G.lives).trim()}</b><strong id="timeLabel">${G.time.toFixed(1)}s</strong></div><div class="game-frame"><canvas id="slice" width="360" height="510" aria-label="Trò chơi chém món ăn"></canvas><div id="gameOverlay" class="game-overlay"><div class="game-overlay-inner"><div class="eyebrow">Cách chơi</div><h3>Sẵn sàng chưa?</h3><p>Vuốt hoặc kéo chuột qua món của anh để chém, chém nhầm món của em là mất mạng. ${G.time} giây, ${G.lives} mạng, cần ${G.target} điểm.</p><button class="btn btn-primary" id="startGame">Bắt đầu →</button></div></div></div></div></section>`;
     setupSlice();
   }
   function setupSlice() {
@@ -283,7 +283,7 @@
       const overlay = document.getElementById('gameOverlay');
       overlay.classList.remove('hidden');
       const reason = g.lives <= 0 ? `Chém nhầm món của em ${G.lives} lần rồi. Món anh thích mà em cũng nhầm à?` : `Mới được ${g.score}/${G.target} điểm. Chém thêm phát nữa.`;
-      overlay.innerHTML = `<div class="game-overlay-inner"><div class="eyebrow">${win ? 'Qua màn' : 'Chưa qua'}</div><h3>${win ? `${g.score} điểm!` : 'Thử lại nhé'}</h3><p>${win ? 'Biết rõ anh thích ăn gì thế này thì coi như chứng minh xong.' : reason}</p><button class="btn btn-primary" id="${win ? 'unlockYes' : 'retryGame'}">${win ? 'Mở thư ♥' : 'Chơi lại →'}</button></div>`;
+      overlay.innerHTML = `<div class="game-overlay-inner"><div class="eyebrow">${win ? 'Qua màn' : 'Chưa qua'}</div><h3>${win ? `${g.score} điểm!` : 'Thử lại nhé'}</h3><p>${win ? 'Biết rõ anh thích ăn gì thế này thì coi như chứng minh xong.' : reason}</p><button class="btn btn-primary" id="${win ? 'unlockYes' : 'retryGame'}">${win ? 'Tuyên án ♥' : 'Chơi lại →'}</button></div>`;
       if (win) { state.gameWon = true; confetti(); document.getElementById('unlockYes').onclick = () => { go('final'); confetti(); }; }
       else document.getElementById('retryGame').onclick = () => render();
     }
@@ -293,24 +293,19 @@
     document.getElementById('startGame').onclick = () => {
       g.running = true; g.last = performance.now();
       document.getElementById('gameOverlay').classList.add('hidden');
-      const hud = app.querySelector('.game-hud').getBoundingClientRect();
-      window.scrollTo({ top: window.scrollY + hud.top - document.querySelector('.topbar').offsetHeight - 8, behavior: 'smooth' });
       g.raf = requestAnimationFrame(draw);
     };
   }
 
   function memories() {
-    const back = state.from === 'memories' ? 'court' : state.from;
-    app.innerHTML = `<section class="section">${head({ back, backLabel: 'Quay lại', eyebrow: 'Kho kỉ niệm', title: 'Ba năm, tóm tắt', intro: 'Hồ sơ hai đứa và mấy mốc đáng nhớ.' })}<div class="profiles">${C.profiles.map(p => `<article class="profile"><div class="eyebrow">${esc(p.tag)}</div><h3>${esc(p.name)}</h3><dl>${p.rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div><h3 class="subhead">Dòng thời gian <span>${C.milestones.length} mốc</span></h3><ol class="timeline">${C.milestones.map(m => `<li class="memory"><div class="memory-date">${esc(m.date)}</div><div><h4>${esc(m.title)}</h4><p>${esc(m.text)}</p></div>${m.image ? `<img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove()">` : ''}</li>`).join('')}</ol><div class="action-row"><span></span><button class="btn btn-primary" id="finishCase">${state.gameWon ? 'Đọc lại thư →' : 'Quay lại →'}</button></div></section>`;
-    document.getElementById('finishCase').onclick = () => go(state.gameWon ? 'final' : back);
+    app.innerHTML = `<section class="section">${head({ back: 'final', backLabel: 'Tuyên án', eyebrow: 'Kho kỉ niệm' })}<div class="profiles">${C.profiles.map(p => `<article class="profile"><div class="eyebrow">${esc(p.tag)}</div><h3>${esc(p.name)}</h3><dl>${p.rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div><ol class="timeline">${C.milestones.map(m => `<li class="memory"><div class="memory-date">${esc(m.date)}</div><div><h4>${esc(m.title)}</h4><p>${esc(m.text)}</p></div>${m.image ? `<img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove()">` : ''}</li>`).join('')}</ol></section>`;
   }
 
   function finalScreen() {
     if (!state.gameWon) return go('game');
     const d = C.dateNight || {}, invite = [['Thời gian', d.when], ['Địa điểm', d.where], ['Mặc gì', d.dress], ['Kế hoạch', d.plan]].filter(([, v]) => v);
-    app.innerHTML = `<section class="section">${head({ back: 'game', backLabel: 'Trò chơi', step: 'final', eyebrow: 'Phần cuối · Khép hồ sơ 03-A', title: 'Ba năm rồi đấy.' })}<div class="card final-card"><div class="final-seal">ĐÃ<br>KHÉP</div>${C.sharedPhoto ? `<img class="final-photo" src="${esc(C.sharedPhoto)}" alt="Ảnh hai đứa" onerror="this.remove()">` : ''}<p class="final-message">${esc(C.finalMessage)}</p>${invite.length ? `<div class="date-invite"><h3>Thư mời đi hẹn hò</h3><div class="invite-grid">${invite.map(([k, v]) => `<div class="invite-item"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}<div class="media-controls">${C.songUrl ? `<a href="${esc(C.songUrl)}" target="_blank" rel="noopener">♫ Bài hát của hai đứa</a>` : ''}${C.voiceUrl ? `<audio controls preload="none" src="${esc(C.voiceUrl)}">Trình duyệt không phát được âm thanh.</audio>` : ''}<button id="reviewMemories">Kho kỉ niệm ↗</button><button id="restart">Chơi lại từ đầu ↺</button></div></div></section>`;
-    document.getElementById('reviewMemories').onclick = openMemories;
-    document.getElementById('restart').onclick = () => { Object.assign(state, fresh()); render(); };
+    app.innerHTML = `<section class="section">${head({ back: 'game', backLabel: 'Biện hộ', step: 'final', eyebrow: 'Phần 5 · Tuyên án' })}<div class="card final-card"><div class="final-letter"><div class="final-seal">ĐÃ<br>KHÉP</div>${C.sharedPhoto ? `<img class="final-photo" src="${esc(C.sharedPhoto)}" alt="Ảnh hai đứa" onerror="this.remove()">` : ''}<p class="final-message">${esc(C.finalMessage)}</p></div><div class="final-side">${invite.length ? `<div class="date-invite"><h3>Thư mời đi hẹn hò</h3><div class="invite-grid">${invite.map(([k, v]) => `<div class="invite-item"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}<div class="media-controls">${C.songUrl ? `<a href="${esc(C.songUrl)}" target="_blank" rel="noopener">♫ Bài hát của hai đứa</a>` : ''}${C.voiceUrl ? `<audio controls preload="none" src="${esc(C.voiceUrl)}">Trình duyệt không phát được âm thanh.</audio>` : ''}<button id="reviewMemories">Kho kỉ niệm ↗</button></div></div></div></section>`;
+    document.getElementById('reviewMemories').onclick = () => go('memories');
   }
 
   function confetti() {
@@ -325,13 +320,13 @@
     }
   }
 
-  document.getElementById('soundToggle').onclick = e => {
-    state.audio = !state.audio;
-    e.currentTarget.innerHTML = `♪ <span>Âm thanh: ${state.audio ? 'bật' : 'tắt'}</span>`;
-    e.currentTarget.setAttribute('aria-pressed', state.audio);
-  };
+  // Nhạc nền luôn bật; trình duyệt chặn tự phát nên phát ở lần chạm/bấm đầu tiên.
+  const bgm = C.musicUrl ? Object.assign(new Audio(C.musicUrl), { loop: true }) : null;
+  const playBgm = () => { if (bgm && bgm.paused) bgm.play().catch(() => {}); };
+  playBgm();
+  ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, playBgm));
   document.addEventListener('click', e => {
-    if (!state.audio || !e.target.closest('button') || e.target.closest('#soundToggle')) return;
+    if (!e.target.closest('button')) return;
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return;
@@ -342,6 +337,6 @@
       osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(t + .09);
     } catch (_) { /* Âm thanh chỉ là phụ, lỗi thì bỏ qua. */ }
   });
-  document.getElementById('replayLink').onclick = () => { if (state.screen === 'home') showToast('Đang ở trang đầu rồi.'); else go('home'); };
+  document.getElementById('replayLink').onclick = () => { Object.assign(state, fresh()); render(); };
   render();
 })();
