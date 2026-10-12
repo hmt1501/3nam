@@ -14,27 +14,26 @@ window.CASE_FILE = {
   agentName: "Bùi Thùy Linh", agentNickname: "Linh Béo",
   partnerName: "Hoàng Mạnh Tân", partnerNickname: "Tân đẹp trai",
   relationshipStart: "2023-10-25",
-  caseIntro: "đối tượng đã ở cạnh Tân đẹp trai 3 năm, hay trấn lột tiền, tranh chăn lúc nửa đêm và chưa có ý định rời đi.",
+  caseIntro: "Đối tượng đã ở cạnh Tân đẹp trai 3 năm, hay trấn lột tiền, tranh chăn lúc nửa đêm và chưa có ý định rời đi.",
 
   quiz: [
-    { question: "Anh tỏ tình với em ngày nào?", choices: ["20/10/2023", "25/10/2023", "01/11/2023"], answer: 1, other: ["25 10", "25 thang 10"], fact: "25/10/2023. Mọi chuyện bắt đầu từ hôm đó." },
-    { question: "Lần đầu đi chơi, em tặng anh cái gì?", choices: ["Một cái móc khóa", "Hai con búp bê cung hoàng đạo đan len", "Một hộp socola"], answer: 1, other: ["bup be", "cung hoang dao", "dan len"], fact: "Hai con búp bê cung hoàng đạo đan len." },
-    { question: "Hôm đó hai đứa đi đâu?", choices: ["Hồ Tây", "Phố đi bộ Hồ Gươm", "Bánh canh đường Láng"], answer: 1, other: ["ho guom", "hoan kiem", "pho di bo"], fact: "Phố đi bộ Hồ Gươm." },
-    { question: "Hôm đó ai nắm tay ai trước?", choices: ["Anh", "Em", "Không ai nhớ"], answer: 1, fact: "Em chủ động đấy. Anh nhớ rõ." },
-    { question: "Tháng 12/2023, hai đứa cãi nhau lần đầu. Vì sao?", choices: ["Anh quên một ngày quan trọng", "Em đi chơi hết pin, anh đứng chờ ngoài cửa lạnh quá nên về trước", "Tranh nhau miếng ăn cuối"], answer: 1, fact: "Em đi chơi hết pin điện thoại, anh sang đứng đợi ngoài cửa rét run rồi bỏ về. Thế là cãi nhau." },
+    { question: "Ngày tỏ tình?", choices: ["20/10/2023", "25/10/2022", "01/11/2023"], answer: -1, other: ["25 10 2023", "25 thang 10 nam 2023"], fact: "25/10/2023. Tỏ tình qua messenger haha." },
+    { question: "Lần đầu đi chơi, em tặng anh cái gì?", choices: ["Móc khóa", "Búp bê đan len", "Một hộp socola"], answer: 1, other: ["bup be", "cung hoang dao", "dan len"], fact: "Hôm đầu gặp nhau trời mưa, em đưa dưới mái hiên" },
+    { question: "Hôm đó hai đứa đi đâu?", choices: ["Hồ Tây", "Hồ Gươm", "Bánh canh"], answer: 1, other: ["ho guom", "hoan kiem", "pho di bo"], fact: "Tặng xong là đi chơi luôn hehe" },
+    { question: "Hôm đó ai nắm tay ai trước?", choices: ["Anh", "Em", "Không nhớ"], answer: 1, fact: "Người đàn bà gia trưởng" },
+    { question: "Tháng 12/2023, hai đứa cãi nhau lần đầu. Vì sao?", choices: ["Quên một ngày quan trọng", "Do emm", "Tranh nhau miếng ăn cuối"], answer: 1, fact: "Em đi chơi hết pin điện thoại, anh sang đứng đợi ngoài cửa rét run rồi bỏ về. Thế là cãi nhau." },
     { question: "Hồi mới yêu, hai đứa xưng hô thế nào?", choices: ["Anh – em", "Cậu – tớ", "Bạn – mình"], answer: 1, other: ["cau to", "to cau"], fact: "Cậu – tớ. Khoảng ba tháng sau em mới bắt đầu xưng em, rồi gọi anh là anh." },
-    { question: "Sinh nhật đầu tiên của anh khi có em (15/1/2024), mình đi đâu?", choices: ["Homestay ở Đội Cấn", "Tam Đảo", "Ở nhà ăn lẩu"], answer: 0, other: ["doi can"], fact: "Homestay ở Đội Cấn." },
-    { question: "Chuyến du lịch đầu tiên của hai đứa là đi đâu?", choices: ["Tam Đảo", "Ba Vì", "Sa Pa"], answer: 1, other: ["ba vi"], fact: "Ba Vì." },
-    { question: "Món anh thích nhất?", choices: ["Mỳ cay", "Bún bò", "Pizza"], answer: -1, other: ["com tam", "com ga"], fact: "Cơm tấm với cơm gà. Mỳ cay với bún bò là món của em mà." },
-    { question: "Đồ ăn vặt anh hay ăn nhất?", choices: ["Tiramisu", "Tart trứng", "Cơm cháy"], answer: 2, other: ["com chay", "banh gau", "bim bim", "snack"], fact: "Cơm cháy, bánh gấu, bim bim. Tiramisu với tart trứng là của em." },
-    { question: "Anh làm nghề gì?", choices: ["Làm IT gì đó", "Data Analyst", "Ngồi máy tính cả ngày"], answer: 1, other: ["data", "analyst", "phan tich du lieu", "da"], fact: "Data Analyst, tức là phân tích dữ liệu. Anh biết thừa là em không nhớ." },
-    { question: "Cái gì em mê mà anh thì không?", choices: ["Chơi game", "Đánh cầu", "Xem phim"], answer: 2, fact: "Xem phim. Game với đánh cầu là của anh." }
+    { question: "Sinh nhật đầu tiên của anh khi có em (15/1/2024), mình đi đâu?", choices: ["Homestay", "Tam Đảo", "Ở nhà ăn lẩu"], answer: 0, other: ["homestay"], fact: "Có nhớ homestay ở đâu không z." },
+    { question: "Chuyến du lịch đầu tiên của hai đứa là đi đâu?", choices: ["Tam Đảo", "Ba Vì", "Sa Pa"], answer: 1, other: ["ba vi"], fact: "Đi ăng thịt nướng" },
+    { question: "Món anh thích nhất?", choices: ["Mỳ cay", "Bún bò", "Pizza"], answer: -1, other: ["com tam"], fact: "Tui ăn mấy cái kia bao giờ, tui ăn cơm tấm mà" },
+    { question: "Đồ ăn vặt anh hay ăn nhất?", choices: ["Tiramisu", "Tart trứng", "Cơm cháy"], answer: 2, other: ["com chay"], fact: "Mi thích Tiramisu với tart trứng thì có" },
+    { question: "Anh làm nghề gì?", choices: ["IT", "Data Analyst", "AI Engineer"], answer: 1, other: ["data", "analyst", "phan tich du lieu", "da"], fact: "Rõ ràng là không biết." }
   ],
   // Lời nhận xét sau phần hỏi, xét theo tỉ lệ câu đúng (min = 0.8 nghĩa là từ 80% trở lên).
   quizVerdicts: [
-    { min: 0.85, text: "Nhớ hơn cả anh. Không có gì để chê." },
-    { min: 0.5, text: "Tạm được. Mấy câu sai anh ghi sổ rồi nhé." },
-    { min: 0, text: "Ba năm mà thế này à. Thôi đi tiếp, anh kể lại sau." }
+    { min: 0.85, text: "Tàm tạm." },
+    { min: 0.5, text: "Nhớ gì tôi đâu" },
+    { min: 0, text: "Ba năm mà thế này à. Vứt" }
   ],
 
   // Tật xấu: người chơi tự xếp vào Linh / Tân / Cả hai.
@@ -47,12 +46,12 @@ window.CASE_FILE = {
   ],
   milestones: [
     { date: "25/10/2023", title: "Tỏ tình", text: "Ngày bắt đầu. Hồi đó vẫn còn cậu cậu tớ tớ.", image: "" },
-    { date: "Lần đầu đi chơi", title: "Hai con búp bê len", text: "Em tặng anh hai con búp bê cung hoàng đạo đan len. Tối đó đi phố đi bộ Hồ Gươm, em chủ động nắm tay anh trước.", image: "" },
-    { date: "12/2023", title: "Lần cãi nhau đầu tiên", text: "Em đi chơi hết pin, anh sang đứng đợi ngoài cửa rét căm căm rồi về trước. Về đến nhà là cãi nhau.", image: "" },
+    { date: "Lần đầu đi chơi", title: "Hai con búp bê len", text: "Em tặng anh hai con búp bê cung hoàng đạo đan len. Tối đó đi phố đi bộ Hồ Gươm, em chủ động nắm tay anh trước đồ he.", image: "" },
+    { date: "12/2023", title: "Lần cãi nhau đầu tiên", text: "Em đi chơi hết pin, anh sang đứng đợi ngoài cửa rét căm căm rồi về trước. Về đến nhà là cãi nhau online.", image: "" },
     { date: "Đầu 2024", title: "Từ cậu – tớ sang anh – em", text: "Khoảng ba tháng sau, em bắt đầu xưng em và gọi anh là anh.", image: "" },
     { date: "15/01/2024", title: "Sinh nhật đầu tiên có em", text: "Hai đứa đi homestay ở Đội Cấn.", image: "" },
     { date: "Chuyến đi đầu tiên", title: "Ba Vì", text: "Lần đầu hai đứa đi du lịch cùng nhau.", image: "" },
-    { date: "25/10/2026", title: "Ba năm", text: "Vẫn tranh chăn, vẫn ăn vặt, vẫn ở đây.", image: "" }
+    { date: "25/10/2026", title: "Ba năm", text: "Vẫn tranh chăn, vẫn ăn như heo, vẫn bám người.", image: "" }
   ],
 
   // Game chém món: chém món của Tân (good) để ghi điểm, chém nhầm món của Linh (bad) là mất một mạng.
@@ -63,16 +62,12 @@ window.CASE_FILE = {
       { label: "Cơm tấm", icon: "🍚", img: fluent("Cooked rice") },
       { label: "Cơm gà", icon: "🍗", img: fluent("Poultry leg") },
       { label: "Cơm cháy", icon: "🫓", img: fluent("Flatbread") },
-      { label: "Bánh gấu", icon: "🧸", img: fluent("Teddy bear") },
-      { label: "Bim bim", icon: "🍿", img: fluent("Popcorn") }
-    ],
+      { label: "Bánh gấu", icon: "🧸", img: fluent("Teddy bear") }    ],
     bad: [
       { label: "Bún bò", icon: "🍜", img: fluent("Steaming bowl") },
       { label: "Mỳ cay", icon: "🍝", img: fluent("Spaghetti") },
       { label: "Tiramisu", icon: "🍰", img: fluent("Shortcake") },
-      { label: "Tart trứng", icon: "🥧", img: fluent("Pie") },
-      { label: "Bánh kem", icon: "🎂", img: fluent("Birthday cake") }
-    ]
+      { label: "Tart trứng", icon: "🥧", img: fluent("Pie") }    ]
   },
 
   // BẢN NHÁP — Tân nên tự sửa lại bằng giọng của mình.
