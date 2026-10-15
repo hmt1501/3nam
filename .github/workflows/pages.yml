@@ -27,6 +27,7 @@ jobs:
           cp index.html app.js config.js styles.css _site/
           touch _site/.nojekyll
           if [ -d images ]; then cp -R images _site/images; fi
+          if [ -d music ]; then cp -R music _site/music; fi
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
