@@ -71,9 +71,9 @@ window.CASE_FILE = {
   },
 
   // BẢN NHÁP — Tân nên tự sửa lại bằng giọng của mình.
-  finalMessage: "Linh,\n\nBa năm trước anh tỏ tình, hồi đó hai đứa còn cậu cậu tớ tớ. Lần đầu đi chơi em tặng anh hai con búp bê len, rồi em nắm tay anh trước ở phố đi bộ. Anh vẫn nhớ.\n\nMình cũng cãi nhau rồi, có hôm anh đứng ngoài cửa lạnh xong bỏ về. Mình cũng cùng béo lên, cùng thức khuya, tranh chăn nhau mỗi đêm. Mấy cái đó anh không đổi đâu.\n\nNăm thứ tư anh vẫn muốn đi cùng em. Đi ăn cơm gà, đi thêm vài chỗ như Ba Vì, và anh sẽ cố ngồi xem hết một bộ phim với em.\n\nTân",
+  finalMessage: "Hello Linh béo ú,\n\nThấm thoắt đã 3 năm ở bên nhau rồi cục nợ ạ. Mình cũng đã tăng lên rấc nhìu cân, cùng đi chơi khắp đó đây và vượt qua bao khó khăn cùng nhau.\n\Để bước sang năm thứ 4 và mai sau này, cục cức hãy viết ra 1 dòng nhỏ nhắn nhủ điều tui cần cải thiện và điều em hứa sẽ cải thiện để cả 2 cùng có mục tiêu phấn đấu nhé.\n\\n\nTân",
   // Để trống hết thì phần thư mời tự ẩn.
-  dateNight: { when: "24/10/2026", where: "Sushi"},
+  dateNight: { when: "24/10/2026", where: "Hadilao Trần Duy Hưng"},
   songUrl: "", voiceUrl: "", sharedPhoto: "",
   // Nhạc nền phát liên tục (Mưa Tình Yêu / 雨愛): chép file mp3 vào thư mục music/ với đúng tên này. Để trống thì tắt.
   musicUrl: "music/mua-tinh-yeu.mp3"
