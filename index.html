@@ -6,13 +6,31 @@
   <title>Hồ sơ tuyệt mật · 03 năm</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@600;700;800&display=swap">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
+  <!-- Intro overlay — no music, click seal to enter -->
+  <div id="intro" class="intro-overlay" role="dialog" aria-label="Mở hồ sơ">
+    <div class="intro-content">
+      <p class="intro-label">Bạn có hồ sơ cần kiểm tra</p>
+      <div class="intro-envelope" aria-hidden="false">
+        <div class="envelope-body">
+          <div class="envelope-flap"></div>
+          <div class="envelope-paper">
+            <div class="envelope-lines"><i></i><i></i><i></i></div>
+          </div>
+          <button class="envelope-seal" id="openCase">MỞ<br>HỒ SƠ</button>
+        </div>
+      </div>
+    </div>
+    <div class="intro-particles" aria-hidden="true"></div>
+  </div>
+
+
   <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
   <main id="app" aria-live="polite"></main>
   <footer class="footer"><button id="replayLink" type="button">Làm lại ↺</button></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="config.js"></script><script src="app.js"></script>
+  <script src="config.js?v=6"></script><script src="app.js?v=6"></script>
 </body>
 </html>

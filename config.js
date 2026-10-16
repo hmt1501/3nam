@@ -62,18 +62,29 @@ window.CASE_FILE = {
       { label: "Cơm tấm", icon: "🍚", img: fluent("Cooked rice") },
       { label: "Cơm gà", icon: "🍗", img: fluent("Poultry leg") },
       { label: "Cơm cháy", icon: "🫓", img: fluent("Flatbread") },
-      { label: "Bánh gấu", icon: "🧸", img: fluent("Teddy bear") }    ],
+      { label: "Bánh gấu", icon: "🧸", img: fluent("Teddy bear") }],
     bad: [
       { label: "Bún bò", icon: "🍜", img: fluent("Steaming bowl") },
       { label: "Mỳ cay", icon: "🍝", img: fluent("Spaghetti") },
       { label: "Tiramisu", icon: "🍰", img: fluent("Shortcake") },
-      { label: "Tart trứng", icon: "🥧", img: fluent("Pie") }    ]
+      { label: "Tart trứng", icon: "🥧", img: fluent("Pie") }]
   },
 
   // BẢN NHÁP — Tân nên tự sửa lại bằng giọng của mình.
-  finalMessage: "Hello Linh béo ú,\n\nThấm thoắt đã 3 năm ở bên nhau rồi cục nợ ạ. Mình cũng đã tăng lên rấc nhìu cân, cùng đi chơi khắp đó đây và vượt qua bao khó khăn cùng nhau.\n\Để bước sang năm thứ 4 và mai sau này, cục cức hãy viết ra 1 dòng nhỏ nhắn nhủ điều tui cần cải thiện và điều em hứa sẽ cải thiện để cả 2 cùng có mục tiêu phấn đấu nhé.\n\\n\nTân",
+  finalMessage: "Hello Linh béo ú,\nThấm thoắt đã 3 năm ở bên nhau rồi cục nợ ạ.\nMình cũng đã tăng lên rấc nhìu cân, cùng đi chơi khắp đó đây và vượt qua bao khó khăn cùng nhau.\nĐể bước sang năm thứ 4 và mai sau này, cục cức hãy viết ra 1 dòng nhỏ nhắn nhủ điều tui cần cải thiện và điều em hứa sẽ cải thiện để cả 2 cùng có mục tiêu phấn đấu nhé.\nTân",
+  // Cấu hình nhận phản hồi qua email từ FormSubmit
+  feedback: {
+    email: "hoangmanhtan1501@gmail.com",
+    title: "Mục tiêu năm thứ 4",
+    field1Label: "Điều anh (Tân) cần cải thiện:",
+    field1Placeholder: "Ví dụ: bớt thức khuya, quan tâm em nhiều hơn...",
+    field2Label: "Điều em (Linh) hứa sẽ cải thiện:",
+    field2Placeholder: "Ví dụ: bớt dỗi vô cớ, chịu khó ăn đúng bữa...",
+    btnText: "Gửi cho anh ♥",
+    successMsg: "Anh đã nhận được rồi nhé!"
+  },
   // Để trống hết thì phần thư mời tự ẩn.
-  dateNight: { when: "24/10/2026", where: "Hadilao Trần Duy Hưng"},
+  dateNight: { when: "24/10/2026", where: "Hadilao Trần Duy Hưng" },
   songUrl: "", voiceUrl: "", sharedPhoto: "",
   // Nhạc nền phát liên tục (Mưa Tình Yêu / 雨愛): chép file mp3 vào thư mục music/ với đúng tên này. Để trống thì tắt.
   musicUrl: "music/mua-tinh-yeu.mp3"

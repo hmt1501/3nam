@@ -33,7 +33,7 @@
   }
 
   function showToast(message) { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2300); }
-  const screens = { home, quiz, quizResult, court, choice, game: gameScreen, memories, final: finalScreen };
+  const screens = { home, quiz, quizResult, court, choice, game: gameScreen, memories, final: finalScreen, outro: outroScreen };
   function render() {
     if (cleanup) { cleanup(); cleanup = null; }
     (screens[state.screen] || home)();
@@ -298,14 +298,139 @@
   }
 
   function memories() {
-    app.innerHTML = `<section class="section">${head({ back: 'final', backLabel: 'Tuyên án', eyebrow: 'Kho kỉ niệm' })}<div class="profiles">${C.profiles.map(p => `<article class="profile"><div class="eyebrow">${esc(p.tag)}</div><h3>${esc(p.name)}</h3><dl>${p.rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div><ol class="timeline">${C.milestones.map(m => `<li class="memory"><div class="memory-date">${esc(m.date)}</div><div><h4>${esc(m.title)}</h4><p>${esc(m.text)}</p></div>${m.image ? `<img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove()">` : ''}</li>`).join('')}</ol></section>`;
+    app.innerHTML = `<section class="section">${head({ back: 'outro', backLabel: 'Quay lại', eyebrow: 'Kho kỉ niệm' })}<div class="profiles">${C.profiles.map(p => `<article class="profile"><div class="eyebrow">${esc(p.tag)}</div><h3>${esc(p.name)}</h3><dl>${p.rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></article>`).join('')}</div><ol class="timeline">${C.milestones.map(m => `<li class="memory"><div class="memory-date">${esc(m.date)}</div><div><h4>${esc(m.title)}</h4><p>${esc(m.text)}</p></div>${m.image ? `<img src="${esc(m.image)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove()">` : ''}</li>`).join('')}</ol></section>`;
   }
 
   function finalScreen() {
     if (!state.gameWon) return go('game');
     const d = C.dateNight || {}, invite = [['Thời gian', d.when], ['Địa điểm', d.where], ['Mặc gì', d.dress], ['Kế hoạch', d.plan]].filter(([, v]) => v);
-    app.innerHTML = `<section class="section">${head({ back: 'game', backLabel: 'Biện hộ', step: 'final', eyebrow: 'Phần 5 · Tuyên án' })}<div class="card final-card"><div class="final-letter"><div class="final-seal">ĐÃ<br>KHÉP</div>${C.sharedPhoto ? `<img class="final-photo" src="${esc(C.sharedPhoto)}" alt="Ảnh hai đứa" onerror="this.remove()">` : ''}<p class="final-message">${esc(C.finalMessage)}</p></div><div class="final-side">${invite.length ? `<div class="date-invite"><h3>Thư mời đi hẹn hò</h3><div class="invite-grid">${invite.map(([k, v]) => `<div class="invite-item"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}<div class="media-controls">${C.songUrl ? `<a href="${esc(C.songUrl)}" target="_blank" rel="noopener">♫ Bài hát của hai đứa</a>` : ''}${C.voiceUrl ? `<audio controls preload="none" src="${esc(C.voiceUrl)}">Trình duyệt không phát được âm thanh.</audio>` : ''}<button id="reviewMemories">Kho kỉ niệm ↗</button></div></div></div></section>`;
-    document.getElementById('reviewMemories').onclick = () => go('memories');
+    const fb = C.feedback || {};
+    const targetEmail = fb.email || 'hoangmanhtan1501@gmail.com';
+
+    const formHtml = `
+      <form class="promise-form" id="promiseForm">
+        <div class="promise-header">
+          <div class="promise-title">
+            <span class="promise-icon">💌</span>
+            <div>
+              <h4>${esc(fb.title || 'Mục tiêu năm thứ 4')}</h4>
+              <small>Lời nhắn nhủ cho ${esc(C.partnerName || 'Tân')}</small>
+            </div>
+          </div>
+        </div>
+        <div class="promise-fields">
+          <div class="promise-field">
+            <label for="improvePartner">${esc(fb.field1Label || 'Điều anh (Tân) cần cải thiện:')}</label>
+            <textarea id="improvePartner" name="improvePartner" rows="2" maxlength="500" required placeholder="${esc(fb.field1Placeholder || 'Ví dụ: bớt thức khuya, quan tâm em nhiều hơn...')}"></textarea>
+          </div>
+          <div class="promise-field">
+            <label for="improveAgent">${esc(fb.field2Label || 'Điều em (Linh) hứa sẽ cải thiện:')}</label>
+            <textarea id="improveAgent" name="improveAgent" rows="2" maxlength="500" required placeholder="${esc(fb.field2Placeholder || 'Ví dụ: bớt dỗi vô cớ, chịu khó ăn đúng bữa...')}"></textarea>
+          </div>
+        </div>
+        <div class="promise-footer">
+          <button type="submit" class="btn btn-primary" id="promiseSubmitBtn">
+            <span class="btn-text">${esc(fb.btnText || 'Gửi cho anh ♥')}</span>
+          </button>
+          <div id="promiseStatus" class="promise-status"></div>
+        </div>
+      </form>
+    `;
+
+    app.innerHTML = `<section class="section">${head({ back: 'game', backLabel: 'Biện hộ', step: 'final', eyebrow: 'Phần 5 · Tuyên án' })}<div class="card final-card"><div class="final-letter"><div class="final-seal">ĐÃ<br>KHÉP</div>${C.sharedPhoto ? `<img class="final-photo" src="${esc(C.sharedPhoto)}" alt="Ảnh hai đứa" onerror="this.remove()">` : ''}<p class="final-message">${esc(C.finalMessage)}</p>${formHtml}</div><div class="final-side">${invite.length ? `<div class="date-invite"><h3>Thư mời đi hẹn hò</h3><div class="invite-grid">${invite.map(([k, v]) => `<div class="invite-item"><small>${k}</small><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}<div class="media-controls">${C.songUrl ? `<a href="${esc(C.songUrl)}" target="_blank" rel="noopener">♫ Bài hát của hai đứa</a>` : ''}${C.voiceUrl ? `<audio controls preload="none" src="${esc(C.voiceUrl)}">Trình duyệt không phát được âm thanh.</audio>` : ''}</div></div></div></section>`;
+
+    const form = document.getElementById('promiseForm');
+    if (form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('promiseSubmitBtn');
+        const status = document.getElementById('promiseStatus');
+        const partnerVal = document.getElementById('improvePartner').value.trim();
+        const agentVal = document.getElementById('improveAgent').value.trim();
+
+        if (!partnerVal || !agentVal) {
+          showToast('Em hãy viết đủ cả 2 điều nhé ♥');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-text">Đang gửi thư đi... ⏳</span>';
+        status.className = 'promise-status';
+        status.textContent = '';
+
+        const payload = {
+          _subject: `💌 [Kỉ niệm 3 năm] Lời nhắn nhủ năm thứ 4 từ ${C.agentNickname || 'Linh'}!`,
+          "Người gửi": `${C.agentName || 'Linh'} (${C.agentNickname || 'Linh'})`,
+          "Người nhận": `${C.partnerName || 'Tân'} (${C.partnerNickname || 'Tân'})`,
+          "1. Điều anh cần cải thiện": partnerVal,
+          "2. Điều em hứa sẽ cải thiện": agentVal,
+          "Thời gian gửi": new Date().toLocaleString('vi-VN'),
+          _template: "table",
+          _captcha: "false"
+        };
+
+        try {
+          const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(targetEmail)}`, {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok || data.success === "true" || data.success === true) {
+            confetti();
+            status.className = 'promise-status is-success';
+            status.innerHTML = `✓ ${esc(fb.successMsg || 'Anh đã nhận được rồi nhé!')}`;
+            btn.innerHTML = '<span class="btn-text">Đã gửi thành công ♥</span>';
+            localStorage.setItem('couple_feedback', JSON.stringify({
+              improvePartner: partnerVal,
+              improveAgent: agentVal,
+              sent: true,
+              at: new Date().toISOString()
+            }));
+            showToast('Đã gửi thành công tới email của anh rồi ♥');
+            setTimeout(() => go('outro'), 1100);
+          } else {
+            throw new Error(data.message || 'Lỗi gửi thư');
+          }
+        } catch (err) {
+          status.className = 'promise-status is-error';
+          status.innerHTML = 'Không gửi được qua mạng. <button type="button" id="copyPromise" class="link-inline">Bấm để sao chép</button> gửi cho anh nhé!';
+          btn.disabled = false;
+          btn.innerHTML = `<span class="btn-text">${esc(fb.btnText || 'Thử gửi lại ♥')}</span>`;
+          const copyBtn = document.getElementById('copyPromise');
+          if (copyBtn) {
+            copyBtn.onclick = () => {
+              const txt = `Lời nhắn năm thứ 4:\n- Điều anh cần cải thiện: ${partnerVal}\n- Điều em hứa cải thiện: ${agentVal}`;
+              navigator.clipboard.writeText(txt).then(() => showToast('Đã sao chép vào bộ nhớ tạm!'));
+            };
+          }
+        }
+      };
+    }
+  }
+
+  function outroScreen() {
+    app.innerHTML = `
+      <section class="outro-stage">
+        <div class="outro-card">
+          <span class="outro-heart" aria-hidden="true">♥</span>
+          <h2 class="outro-title">Hẹn sớm gặp lại Linh béo ♥</h2>
+          <p class="outro-sub">Hồ sơ 03 năm đã được niêm phong an toàn và gửi tới anh.</p>
+          <div class="outro-floating-wrap">
+            <button class="btn btn-floating-memories" id="openMemoriesBtn">
+              <span>📖</span>
+              <span>Kho kỉ niệm</span>
+              <span>↗</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    `;
+    confetti();
+    document.getElementById('openMemoriesBtn').onclick = () => go('memories');
   }
 
   function confetti() {
@@ -320,11 +445,60 @@
     }
   }
 
-  // Nhạc nền luôn bật; trình duyệt chặn tự phát nên phát ở lần chạm/bấm đầu tiên.
+  // === INTRO SCREEN ===
+  const introEl = document.getElementById('intro');
+  const openBtn = document.getElementById('openCase');
+
+  // Spawn subtle floating particles
+  const particleContainer = introEl.querySelector('.intro-particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('span');
+    p.className = 'intro-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = -(Math.random() * 30) + '%';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 6) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    particleContainer.appendChild(p);
+  }
+
+  // Nhạc nền: KHÔNG phát ngay — chỉ phát sau khi intro chuyển cảnh xong.
   const bgm = C.musicUrl ? Object.assign(new Audio(C.musicUrl), { loop: true }) : null;
-  const playBgm = () => { if (bgm && bgm.paused) bgm.play().catch(() => {}); };
-  playBgm();
-  ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, playBgm));
+  let musicUnlocked = false;
+
+  function startMusic() {
+    if (musicUnlocked) return;
+    musicUnlocked = true;
+    if (bgm) {
+      bgm.volume = 0;
+      bgm.play().then(() => {
+        // Fade in nhạc mượt mà
+        let vol = 0;
+        const fade = setInterval(() => {
+          vol = Math.min(1, vol + 0.05);
+          bgm.volume = vol;
+          if (vol >= 1) clearInterval(fade);
+        }, 60);
+      }).catch(() => { });
+    }
+  }
+
+  // Khi bấm nút "Mở hồ sơ": chuyển cảnh intro -> app
+  openBtn.onclick = () => {
+    introEl.classList.add('exit');
+    // Bắt đầu nhạc sau khi hiệu ứng chạy được nửa chừng
+    setTimeout(startMusic, 400);
+    // Xóa intro khỏi DOM sau khi animation xong
+    setTimeout(() => {
+      introEl.classList.add('gone');
+    }, 900);
+  };
+
+  // Sau khi intro đã bị dismiss, các lần chạm tiếp đảm bảo nhạc chạy (trình duyệt chặn autoplay)
+  ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, () => {
+    if (musicUnlocked && bgm && bgm.paused) bgm.play().catch(() => { });
+  }));
+
   document.addEventListener('click', e => {
     if (!e.target.closest('button')) return;
     try {
@@ -337,6 +511,10 @@
       osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(t + .09);
     } catch (_) { /* Âm thanh chỉ là phụ, lỗi thì bỏ qua. */ }
   });
-  document.getElementById('replayLink').onclick = () => { Object.assign(state, fresh()); render(); };
+  document.getElementById('replayLink').onclick = () => {
+    localStorage.removeItem('couple_feedback');
+    Object.assign(state, fresh());
+    render();
+  };
   render();
 })();
